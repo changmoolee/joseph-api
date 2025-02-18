@@ -4,7 +4,9 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { User } from './user/user.entity'; // User 엔티티 추가
+import { Post } from './post/post.entity'; // Post 엔티티 추가
 import { UserModule } from 'src/user/user.module';
+import { PostModule } from 'src/post/post.module';
 
 @Module({
   imports: [
@@ -16,10 +18,12 @@ import { UserModule } from 'src/user/user.module';
       username: process.env.DATABASE_USER,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
-      entities: [User],
+      entities: [User, Post], // 엔티티 추가 필수
       synchronize: true,
     }),
+    // 모듈 추가 필수
     UserModule,
+    PostModule,
   ],
   controllers: [AppController],
   providers: [AppService],
