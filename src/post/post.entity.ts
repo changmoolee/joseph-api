@@ -15,10 +15,6 @@ export class Post {
   @PrimaryGeneratedColumn()
   id: number;
 
-  // 중복되지 않도록 UNIQUE 제약 조건 추가
-  @Column()
-  user_id: string;
-
   // 여러 개의 post가 하나의 user를 참조 (다 대 일 관계)
   @ManyToOne(() => User, (user) => user.posts, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
