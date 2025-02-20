@@ -7,6 +7,7 @@ import { User } from './user/user.entity'; // User 엔티티 추가
 import { Post } from './post/post.entity'; // Post 엔티티 추가
 import { UserModule } from 'src/user/user.module';
 import { PostModule } from 'src/post/post.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { PostModule } from 'src/post/post.module';
     // 모듈 추가 필수
     UserModule,
     PostModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
