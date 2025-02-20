@@ -15,7 +15,7 @@ export class User {
   id: number;
 
   // username과 email은 중복되지 않도록 UNIQUE 제약 조건 추가
-  @Column({ unique: true })
+  @Column()
   username: string;
 
   @Column({ unique: true })
