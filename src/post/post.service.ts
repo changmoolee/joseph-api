@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Post } from './post.entity';
+import { ApiResponseDto } from 'src/common/dto/response.dto';
 
 @Injectable()
 export class PostService {
@@ -13,7 +14,7 @@ export class PostService {
     private postRepository: Repository<Post>,
   ) {}
 
-  async getAllPosts() {
+  async getAllPosts(): Promise<ApiResponseDto<Post[]>> {
     try {
       const posts = await this.postRepository
         .createQueryBuilder('post')
@@ -40,7 +41,7 @@ export class PostService {
 
       return {
         data: [],
-        result: 'fail',
+        result: 'failure',
         message: '게시글을 불러오는 중 오류가 발생했습니다.',
       };
     }

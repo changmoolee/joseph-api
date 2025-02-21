@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Body, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../user/user.entity';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from 'src/auth/dto/create-user.dto';
+import { ApiResponseDto } from 'src/common/dto/response.dto';
 
 @Injectable()
 export class AuthService {
@@ -15,24 +16,40 @@ export class AuthService {
     private userRepository: Repository<User>,
   ) {}
 
-  async signupUser(userDto: CreateUserDto) {
-    // cost 10
-    const saltRounds = 10;
+  async signupUser(
+    @Body() userDto: CreateUserDto,
+  ): Promise<ApiResponseDto<[]>> {
+    try {
+      // cost 10
+      const saltRounds = 10;
 
-    /** 해싱처리한 패스워드 */
-    const hashedPassword = await bcrypt.hash(userDto.password, saltRounds);
+      /** 해싱처리한 패스워드 */
+      const hashedPassword = await bcrypt.hash(userDto.password, saltRounds);
 
-    // https://typeorm.io/insert-query-builder
-    await this.userRepository
-      .createQueryBuilder('user')
-      .insert()
-      .into(User)
-      .values({
-        ...userDto,
-        password: hashedPassword,
-      })
-      .execute();
+      // https://typeorm.io/insert-query-builder
+      await this.userRepository
+        .createQueryBuilder('user')
+        .insert()
+        .into(User)
+        .values({
+          ...userDto,
+          password: hashedPassword,
+        })
+        .execute();
 
-    return this.userRepository.find();
+      return {
+        data: [],
+        result: 'success',
+        message: '회원가입을 성공하였습니다.',
+      };
+    } catch (error) {
+      console.error(error);
+
+      return {
+        data: [],
+        result: 'failure',
+        message: '회원가입을 실패하였습니다.',
+      };
+    }
   }
 }
