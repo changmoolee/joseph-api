@@ -7,7 +7,7 @@ import { ApiResponseDto } from 'src/common/dto/response.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post()
+  @Post('signup')
   async signupUser(
     @Body() userDto: CreateUserDto,
   ): Promise<ApiResponseDto<[]>> {
