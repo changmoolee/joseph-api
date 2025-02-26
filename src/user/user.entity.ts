@@ -24,7 +24,7 @@ export class User {
   @Column({ nullable: true }) // 추후 더미데이터 삭제시 수정 필요
   password: string;
 
-  @Column()
+  @Column({ nullable: true })
   image: string;
 
   // created_at 필드는 유저 생성 시 자동으로 현재 날짜/시간이 저장됨 (DEFAULT CURRENT_TIMESTAMP)
