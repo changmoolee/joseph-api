@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from 'src/user/user.entity';
 import { ApiResponseDto } from 'src/common/dto/response.dto';
@@ -17,5 +17,10 @@ export class UserController {
     @Query('searchWord') searchWord: string,
   ): Promise<ApiResponseDto<User[]>> {
     return this.userService.searchUsers(searchWord || '');
+  }
+
+  @Get(':id')
+  async getUser(@Param('id') id: string) {
+    return this.userService.getUser(id);
   }
 }

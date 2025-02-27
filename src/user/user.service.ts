@@ -1,5 +1,5 @@
 import { ApiResponseDto } from './../common/dto/response.dto';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Param } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
 import { User } from './user.entity';
@@ -16,6 +16,36 @@ export class UserService {
 
   async getAllUsers(): Promise<User[]> {
     return this.userRepository.find();
+  }
+
+  async getUser(@Param('id') id: string): Promise<ApiResponseDto<User>> {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id: parseInt(id) },
+      });
+
+      if (!user) {
+        return {
+          data: null,
+          result: 'failure',
+          message: '회원 데이터를 찾지 못했습니다.',
+        };
+      }
+
+      return {
+        data: user,
+        result: 'success',
+        message: '회원 데이터 호출 완료',
+      };
+    } catch (error) {
+      console.error(error);
+
+      return {
+        data: null,
+        result: 'failure',
+        message: 'api 호출 에러',
+      };
+    }
   }
 
   async searchUsers(searchWord: string): Promise<ApiResponseDto<User[]>> {
