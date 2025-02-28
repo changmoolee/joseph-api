@@ -8,6 +8,8 @@ import { Post } from './post/post.entity'; // Post 엔티티 추가
 import { UserModule } from 'src/user/user.module';
 import { PostModule } from 'src/post/post.module';
 import { AuthModule } from 'src/auth/auth.module';
+import { LikeModule } from 'src/like/like.module';
+import { Like } from 'src/like/like.entity';
 
 @Module({
   imports: [
@@ -19,13 +21,14 @@ import { AuthModule } from 'src/auth/auth.module';
       username: process.env.DATABASE_USER,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
-      entities: [User, Post], // 엔티티 추가 필수
+      entities: [User, Post, Like], // 엔티티 추가 필수
       synchronize: true,
     }),
     // 모듈 추가 필수
     UserModule,
     PostModule,
     AuthModule,
+    LikeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

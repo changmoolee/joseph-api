@@ -1,3 +1,4 @@
+import { Like } from 'src/like/like.entity';
 import { Post } from 'src/post/post.entity';
 import {
   Entity,
@@ -34,4 +35,8 @@ export class User {
   // 한 명의 user가 여러 개의 posts를 가질 수 있음 (일 대 다 관계)
   @OneToMany(() => Post, (post) => post.user)
   posts: Post[];
+
+  // 한 명의 user가 여러 개의 like를 가질 수 있음 (일 대 다 관계)
+  @OneToMany(() => Like, (like) => like.user)
+  likes: Like[];
 }
