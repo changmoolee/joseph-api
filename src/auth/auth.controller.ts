@@ -17,7 +17,10 @@ export class AuthController {
   }
 
   @Post('signin')
-  async signinUser(@Body() userDto: SigninUserDto, @Res() response: Response) {
-    this.authService.signinUser(userDto, response);
+  async signinUser(
+    @Body() userDto: SigninUserDto,
+    @Res() response: Response,
+  ): Promise<void> {
+    return this.authService.signinUser(userDto, response);
   }
 }

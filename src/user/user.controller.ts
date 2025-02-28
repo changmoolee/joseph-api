@@ -8,7 +8,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  async getAllUsers() {
+  async getAllUsers(): Promise<ApiResponseDto<User[]>> {
     return this.userService.getAllUsers();
   }
 
@@ -20,7 +20,7 @@ export class UserController {
   }
 
   @Get(':id')
-  async getUser(@Param('id') id: string) {
+  async getUser(@Param('id') id: string): Promise<ApiResponseDto<User>> {
     return this.userService.getUser(id);
   }
 }

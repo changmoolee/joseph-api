@@ -14,8 +14,23 @@ export class UserService {
     private userRepository: Repository<User>,
   ) {}
 
-  async getAllUsers(): Promise<User[]> {
-    return this.userRepository.find();
+  async getAllUsers(): Promise<ApiResponseDto<User[]>> {
+    try {
+      const users = await this.userRepository.find();
+
+      return {
+        data: users,
+        result: 'success',
+        message: '유저 데이터 호출 완료',
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        data: null,
+        result: 'failure',
+        message: 'api 호출 에러',
+      };
+    }
   }
 
   async getUser(@Param('id') id: string): Promise<ApiResponseDto<User>> {
