@@ -26,7 +26,7 @@ export class User {
   password: string;
 
   @Column({ nullable: true })
-  image: string;
+  image_url: string;
 
   // created_at 필드는 유저 생성 시 자동으로 현재 날짜/시간이 저장됨 (DEFAULT CURRENT_TIMESTAMP)
   @CreateDateColumn()

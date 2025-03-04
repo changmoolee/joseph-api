@@ -110,7 +110,7 @@ export class AuthService {
         data: {
           id: findUser.id,
           email: findUser.email,
-          image: findUser.image,
+          image_url: findUser.image_url,
           username: findUser.username,
         },
         result: 'success',
