@@ -1,3 +1,4 @@
+import { Bookmark } from 'src/bookmark/bookmark.entity';
 import { Like } from 'src/like/like.entity';
 import { User } from 'src/user/user.entity';
 import {
@@ -39,4 +40,8 @@ export class Post {
   // 하나의 post가 여러개의 likes를 참조 (다 대 일 관계)
   @OneToMany(() => Like, (like) => like.post)
   likes: Like[];
+
+  // 하나의 post가 여러개의 bookmark를 참조 (다 대 일 관계)
+  @OneToMany(() => Bookmark, (bookmark) => bookmark.post)
+  bookmarks: Bookmark[];
 }
