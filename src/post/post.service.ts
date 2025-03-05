@@ -58,4 +58,40 @@ export class PostService {
       };
     }
   }
+
+  async getUserPosts(
+    @Param('user_id') user_id: string,
+  ): Promise<ApiResponseDto<Post[]>> {
+    try {
+      const posts = await this.postRepository
+        .createQueryBuilder('post')
+        .leftJoinAndSelect('post.user', 'user')
+        .select([
+          'post.id',
+          'post.image_url',
+          'post.description',
+          'post.created_at',
+          'user.id',
+          'user.username',
+          'user.email',
+          'user.image_url',
+        ])
+        .where('post.user_id = :user_id', { user_id })
+        .getMany();
+
+      return {
+        data: posts,
+        result: 'success',
+        message: '게시글을 성공적으로 가져왔습니다.',
+      };
+    } catch (error) {
+      console.error(error);
+
+      return {
+        data: [],
+        result: 'failure',
+        message: '게시글을 불러오는 중 오류가 발생했습니다.',
+      };
+    }
+  }
 }
