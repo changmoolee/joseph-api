@@ -12,6 +12,8 @@ import { LikeModule } from 'src/like/like.module';
 import { Like } from 'src/like/like.entity';
 import { BookmarkModule } from 'src/bookmark/bookmark.module';
 import { Bookmark } from 'src/bookmark/bookmark.entity';
+import { CommentModule } from 'src/comment/comment.module';
+import { Comment } from 'src/comment/comment.entity';
 
 @Module({
   imports: [
@@ -23,7 +25,7 @@ import { Bookmark } from 'src/bookmark/bookmark.entity';
       username: process.env.DATABASE_USER,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
-      entities: [User, Post, Like, Bookmark], // 엔티티 추가 필수
+      entities: [User, Post, Like, Bookmark, Comment], // 엔티티 추가 필수
       synchronize: true,
     }),
     // 모듈 추가 필수
@@ -32,6 +34,7 @@ import { Bookmark } from 'src/bookmark/bookmark.entity';
     AuthModule,
     LikeModule,
     BookmarkModule,
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
