@@ -7,6 +7,13 @@ import { User } from './user/user.entity'; // User 엔티티 추가
 import { Post } from './post/post.entity'; // Post 엔티티 추가
 import { UserModule } from 'src/user/user.module';
 import { PostModule } from 'src/post/post.module';
+import { AuthModule } from 'src/auth/auth.module';
+import { LikeModule } from 'src/like/like.module';
+import { Like } from 'src/like/like.entity';
+import { BookmarkModule } from 'src/bookmark/bookmark.module';
+import { Bookmark } from 'src/bookmark/bookmark.entity';
+import { CommentModule } from 'src/comment/comment.module';
+import { Comment } from 'src/comment/comment.entity';
 
 @Module({
   imports: [
@@ -18,12 +25,16 @@ import { PostModule } from 'src/post/post.module';
       username: process.env.DATABASE_USER,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
-      entities: [User, Post], // 엔티티 추가 필수
+      entities: [User, Post, Like, Bookmark, Comment], // 엔티티 추가 필수
       synchronize: true,
     }),
     // 모듈 추가 필수
     UserModule,
     PostModule,
+    AuthModule,
+    LikeModule,
+    BookmarkModule,
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

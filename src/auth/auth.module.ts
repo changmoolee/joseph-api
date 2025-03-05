@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './user.entity';
-import { UserController } from './user.controller';
-import { UserService } from './user.service';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { User } from 'src/user/user.entity';
 
 @Module({
   // NestJS의 DI(의존성 주입, Dependency Injection)를 통해 UserRepository를 UserService에서 사용할 수 있도록 함
@@ -11,7 +11,7 @@ import { UserService } from './user.service';
     forFeature([User])를 등록하지 않으면, UserRepository를 UserService에서 사용할 수 없음
   */
   imports: [TypeOrmModule.forFeature([User])],
-  providers: [UserService],
-  controllers: [UserController],
+  providers: [AuthService],
+  controllers: [AuthController],
 })
-export class UserModule {}
+export class AuthModule {}
