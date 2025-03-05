@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Param } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Post } from './post.entity';
@@ -19,6 +19,10 @@ export class PostService {
       const posts = await this.postRepository
         .createQueryBuilder('post')
         .leftJoinAndSelect('post.user', 'user')
+        .leftJoinAndSelect('post.likes', 'likes')
+        .leftJoinAndSelect('post.bookmarks', 'bookmarks')
+        .leftJoinAndSelect('likes.user', 'likeUser')
+        .leftJoinAndSelect('bookmarks.user', 'bookmarkUser')
         .select([
           'post.id',
           'post.image_url',
@@ -27,7 +31,15 @@ export class PostService {
           'user.id',
           'user.username',
           'user.email',
-          'user.image',
+          'user.image_url',
+          'likes.id',
+          'likes.created_at',
+          'likeUser.id',
+          'likeUser.username',
+          'bookmarks.id',
+          'bookmarks.created_at',
+          'bookmarkUser.id',
+          'bookmarkUser.username',
         ])
         .getMany();
 
