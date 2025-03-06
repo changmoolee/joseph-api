@@ -15,15 +15,24 @@ import { Bookmark } from 'src/bookmark/bookmark.entity';
 import { CommentModule } from 'src/comment/comment.module';
 import { Comment } from 'src/comment/comment.entity';
 
+// 개발환경 여부
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 @Module({
   imports: [
     ConfigModule.forRoot(), // 환경 변수 로드
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: process.env.DATABASE_HOST,
+      host: isDevelopment
+        ? process.env.LOCAL_DATABASE_HOST
+        : process.env.DATABASE_HOST,
       port: Number(process.env.DATABASE_PORT),
-      username: process.env.DATABASE_USER,
-      password: process.env.DATABASE_PASSWORD,
+      username: isDevelopment
+        ? process.env.LOCAL_DATABASE_USER
+        : process.env.DATABASE_USER,
+      password: isDevelopment
+        ? process.env.LOCAL_DATABASE_PASSWORD
+        : process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
       entities: [User, Post, Like, Bookmark, Comment], // 엔티티 추가 필수
       synchronize: true,
