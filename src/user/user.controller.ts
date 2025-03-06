@@ -20,7 +20,7 @@ export class UserController {
   }
 
   @Get(':id')
-  async getUser(@Param('id') id: string): Promise<ApiResponseDto<User>> {
+  async getUser(@Param('id') id: number): Promise<ApiResponseDto<User>> {
     return this.userService.getUser(id);
   }
 }

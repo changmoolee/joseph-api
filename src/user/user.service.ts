@@ -33,13 +33,13 @@ export class UserService {
     }
   }
 
-  async getUser(@Param('id') id: string): Promise<ApiResponseDto<User>> {
+  async getUser(@Param('id') id: number): Promise<ApiResponseDto<User>> {
     try {
-      const user = await this.userRepository.findOne({
-        where: { id: parseInt(id) },
+      const findUser = await this.userRepository.findOne({
+        where: { id },
       });
 
-      if (!user) {
+      if (!findUser) {
         return {
           data: null,
           result: 'failure',
@@ -48,7 +48,7 @@ export class UserService {
       }
 
       return {
-        data: user,
+        data: findUser,
         result: 'success',
         message: '회원 데이터 호출 완료',
       };
@@ -78,7 +78,7 @@ export class UserService {
         };
       }
 
-      const users = await this.userRepository.find({
+      const findUsers = await this.userRepository.find({
         where: [
           { username: Like(`%${searchWord}%`) },
           { email: Like(`%${searchWord}%`) },
@@ -87,7 +87,7 @@ export class UserService {
       });
 
       return {
-        data: users,
+        data: findUsers,
         result: 'success',
         message: '',
       };

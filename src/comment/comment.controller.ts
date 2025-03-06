@@ -28,6 +28,6 @@ export class CommentController {
     @Param('id') param,
     @Body() commentDto: UpdateCommentDto,
   ): Promise<ApiResponseDto<null>> {
-    return this.commentService.updateComment(commentDto);
+    return this.commentService.updateComment(param, commentDto);
   }
 }

@@ -90,13 +90,14 @@ export class CommentService {
   }
 
   async updateComment(
+    @Param('id') param,
     @Body() commentDto: UpdateCommentDto,
   ): Promise<ApiResponseDto<null>> {
     try {
       // 수정할 댓글
       const findComment = await this.commentRepository.findOne({
         where: {
-          id: commentDto.id,
+          id: param.id,
         },
       });
 
