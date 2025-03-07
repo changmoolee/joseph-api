@@ -1,8 +1,14 @@
-import { Module } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { User } from 'src/user/user.entity';
+import { JwtMiddleware } from 'src/middleware/jwt.middleware';
 
 @Module({
   // NestJS의 DI(의존성 주입, Dependency Injection)를 통해 UserRepository를 UserService에서 사용할 수 있도록 함
@@ -14,4 +20,10 @@ import { User } from 'src/user/user.entity';
   providers: [AuthService],
   controllers: [AuthController],
 })
-export class AuthModule {}
+export class AuthModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(JwtMiddleware)
+      .forRoutes({ path: 'auth/user/:id', method: RequestMethod.PUT });
+  }
+}
