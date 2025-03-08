@@ -21,7 +21,9 @@ export class JwtMiddleware implements NestMiddleware {
     const secret = new TextEncoder().encode(JWT_SECRET);
 
     try {
-      await jose.jwtVerify(jwt, secret);
+      const { payload } = await jose.jwtVerify(jwt, secret);
+
+      req['user'] = payload;
 
       next();
     } catch (error) {
