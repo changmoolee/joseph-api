@@ -13,6 +13,8 @@ export class PostService {
     // TypeORM의 저장소 객체
     // Post 엔티티의 데이터베이스 조작을 위한 Repository
     private postRepository: Repository<Post>,
+
+    @InjectRepository(User) // user Repo도 추가
     private userRepository: Repository<User>,
   ) {}
 
