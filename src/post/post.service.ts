@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Post } from './post.entity';
 import { ApiResponseDto } from 'src/common/dto/response.dto';
+import { User } from 'src/user/user.entity';
 
 @Injectable()
 export class PostService {
@@ -12,6 +13,7 @@ export class PostService {
     // TypeORM의 저장소 객체
     // Post 엔티티의 데이터베이스 조작을 위한 Repository
     private postRepository: Repository<Post>,
+    private userRepository: Repository<User>,
   ) {}
 
   async getAllPosts(): Promise<ApiResponseDto<Post[]>> {
@@ -32,19 +34,38 @@ export class PostService {
           'user.username',
           'user.email',
           'user.image_url',
+          'user.deleted_at',
           'likes.id',
           'likes.created_at',
           'likeUser.id',
           'likeUser.username',
+          'likeUser.deleted_at',
           'bookmarks.id',
           'bookmarks.created_at',
           'bookmarkUser.id',
           'bookmarkUser.username',
+          'bookmarkUser.deleted_at',
         ])
         .getMany();
 
+      // 탈퇴회원의 게시물 제외
+      const validUserPosts = posts.filter(
+        (post) => post.user.deleted_at === null,
+      );
+
+      // 탈퇴회원의 좋아요, 북마크 제외
+      const validLikeBookmarkPosts = validUserPosts.map((post) => ({
+        ...post,
+        likes: post.likes.filter(
+          (like) => like.user && like.user.deleted_at === null,
+        ),
+        bookmarks: post.bookmarks.filter(
+          (bookmark) => bookmark.user && bookmark.user.deleted_at === null,
+        ),
+      }));
+
       return {
-        data: posts,
+        data: validLikeBookmarkPosts,
         result: 'success',
         message: '게시글을 성공적으로 가져왔습니다.',
       };
@@ -63,6 +84,21 @@ export class PostService {
     @Param('user_id') user_id: string,
   ): Promise<ApiResponseDto<Post[]>> {
     try {
+      const findUser = await this.userRepository.findOne({
+        where: { id: parseInt(user_id) },
+      });
+
+      /** 회원의 탈퇴 여부 */
+      const isValidUser = findUser.deleted_at === null;
+
+      if (isValidUser) {
+        return {
+          data: [],
+          result: 'failure',
+          message: '이미 탈퇴한 회원입니다.',
+        };
+      }
+
       const posts = await this.postRepository
         .createQueryBuilder('post')
         .leftJoinAndSelect('post.user', 'user')
