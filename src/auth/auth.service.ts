@@ -73,6 +73,7 @@ export class AuthService {
           result: 'failure',
           message: '존재하지 않는 이메일입니다.',
         });
+        return;
       }
 
       /** 패스워드 일치 여부 */
@@ -85,6 +86,7 @@ export class AuthService {
           result: 'failure',
           message: '비밀번호가 일치하지 않습니다.',
         });
+        return;
       }
 
       const JWT_SECRET = process.env.JWT_SECRET || '';
