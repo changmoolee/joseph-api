@@ -93,7 +93,7 @@ export class PostService {
       /** 회원의 탈퇴 여부 */
       const isValidUser = findUser.deleted_at === null;
 
-      if (isValidUser) {
+      if (!isValidUser) {
         return {
           data: [],
           result: 'failure',
