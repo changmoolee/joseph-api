@@ -1,4 +1,13 @@
-import { Body, Controller, Param, Post, Put, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Param,
+  Post,
+  Put,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/auth/dto/create-user.dto';
 import { ApiResponseDto } from 'src/common/dto/response.dto';
@@ -30,7 +39,15 @@ export class AuthController {
   async updateUser(
     @Param('id') id: string,
     @Body() usertDto: UpdateUserDto,
-  ): Promise<ApiResponseDto<User>> {
+  ): Promise<ApiResponseDto<User | null>> {
     return this.authService.updateUser(id, usertDto);
+  }
+
+  @Delete('user/:id')
+  async deleteUser(
+    @Param('id') id: string,
+    @Req() req: Request,
+  ): Promise<ApiResponseDto<null>> {
+    return this.authService.deleteUser(id, req);
   }
 }

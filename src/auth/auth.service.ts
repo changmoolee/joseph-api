@@ -1,4 +1,4 @@
-import { Body, Res, Injectable, Param } from '@nestjs/common';
+import { Body, Res, Injectable, Param, Req } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../user/user.entity';
@@ -173,6 +173,51 @@ export class AuthService {
         data: null,
         result: 'failure',
         message: 'api 호출 에러',
+      };
+    }
+  }
+
+  async deleteUser(
+    @Param('id') id: string,
+    @Req() res: Request,
+  ): Promise<ApiResponseDto<null>> {
+    try {
+      const findUser = await this.userRepository.findOne({
+        where: {
+          id: parseInt(id),
+        },
+      });
+
+      if (!findUser) {
+        return {
+          data: null,
+          result: 'failure',
+          message: `user_id :${id} email : ${findUser.email} 회원이 존재하지 않습니다.`,
+        };
+      }
+
+      await this.userRepository
+        .createQueryBuilder()
+        .softDelete()
+        .where('id = :id', { id })
+        .andWhere('email = :email', { email: findUser.email })
+        .execute();
+
+      return {
+        data: null,
+        result: 'success',
+        message: `user_id :${id} email : ${findUser.email} 회원의 계정을 탈퇴하였습니다.`,
+      };
+    } catch (error) {
+      console.error(error);
+
+      /** jwt 미들웨어에서 넘겨준 유저 정보 */
+      const email = res['user'].email;
+
+      return {
+        data: null,
+        result: 'failure',
+        message: `user_id :${id} email : ${email} 회원의 계정 탈퇴를 실패하였습니다.`,
       };
     }
   }
