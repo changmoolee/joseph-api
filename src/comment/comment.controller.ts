@@ -25,9 +25,9 @@ export class CommentController {
 
   @Put('post/:id')
   async updateComment(
-    @Param('id') param,
+    @Param('id') id: string,
     @Body() commentDto: UpdateCommentDto,
   ): Promise<ApiResponseDto<null>> {
-    return this.commentService.updateComment(param, commentDto);
+    return this.commentService.updateComment(id, commentDto);
   }
 }

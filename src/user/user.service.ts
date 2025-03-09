@@ -33,10 +33,10 @@ export class UserService {
     }
   }
 
-  async getUser(@Param('id') id: number): Promise<ApiResponseDto<User>> {
+  async getUser(@Param('id') id: string): Promise<ApiResponseDto<User>> {
     try {
       const findUser = await this.userRepository.findOne({
-        where: { id },
+        where: { id: parseInt(id) },
       });
 
       if (!findUser) {
