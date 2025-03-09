@@ -104,6 +104,12 @@ export class PostService {
       const posts = await this.postRepository
         .createQueryBuilder('post')
         .leftJoinAndSelect('post.user', 'user')
+        .leftJoinAndSelect('post.likes', 'likes')
+        .leftJoinAndSelect('post.bookmarks', 'bookmarks')
+        .leftJoinAndSelect('likes.post', 'likesPost')
+        .leftJoinAndSelect('likes.user', 'likesUser')
+        .leftJoinAndSelect('bookmarks.post', 'bookmarksPost')
+        .leftJoinAndSelect('bookmarks.user', 'bookmarksUser')
         .select([
           'post.id',
           'post.image_url',
@@ -113,6 +119,14 @@ export class PostService {
           'user.username',
           'user.email',
           'user.image_url',
+          'likes.id',
+          'likes.created_at',
+          'likesPost.id',
+          'likesUser.id',
+          'bookmarks.id',
+          'bookmarks.created_at',
+          'bookmarksPost.id',
+          'bookmarksUser.id',
         ])
         .where('post.user_id = :user_id', { user_id })
         .getMany();
