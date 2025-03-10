@@ -82,6 +82,56 @@ export class PostService {
     }
   }
 
+  async getPost(@Param('id') id: string): Promise<ApiResponseDto<Post>> {
+    try {
+      const post = await this.postRepository
+        .createQueryBuilder('post')
+        .leftJoinAndSelect('post.user', 'user')
+        .leftJoinAndSelect('post.likes', 'likes')
+        .leftJoinAndSelect('post.bookmarks', 'bookmarks')
+        .leftJoinAndSelect('likes.user', 'likeUser')
+        .leftJoinAndSelect('bookmarks.user', 'bookmarkUser')
+        .where('post.id = :id', { id: parseInt(id) })
+        .andWhere('user.deleted_at IS NULL')
+        .select([
+          'post.id',
+          'post.image_url',
+          'post.description',
+          'post.created_at',
+          'user.id',
+          'user.username',
+          'user.email',
+          'user.image_url',
+          'user.deleted_at',
+          'likes.id',
+          'likes.created_at',
+          'likeUser.id',
+          'likeUser.username',
+          'likeUser.deleted_at',
+          'bookmarks.id',
+          'bookmarks.created_at',
+          'bookmarkUser.id',
+          'bookmarkUser.username',
+          'bookmarkUser.deleted_at',
+        ])
+        .getOne();
+
+      return {
+        data: post,
+        result: 'success',
+        message: '게시글을 성공적으로 가져왔습니다.',
+      };
+    } catch (error) {
+      console.error(error);
+
+      return {
+        data: null,
+        result: 'failure',
+        message: '게시글을 불러오는 중 오류가 발생했습니다.',
+      };
+    }
+  }
+
   async getUserPosts(
     @Param('user_id') user_id: string,
   ): Promise<ApiResponseDto<Post[]>> {
