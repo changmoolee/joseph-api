@@ -20,7 +20,8 @@ export class PostController {
   @Get('user/:user_id')
   async getUserPosts(
     @Param('user_id') user_id: string,
+    @Query('type') type: string,
   ): Promise<ApiResponseDto<Post[]>> {
-    return this.postService.getUserPosts(user_id);
+    return this.postService.getUserPosts(user_id, type);
   }
 }

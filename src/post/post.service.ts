@@ -1,9 +1,11 @@
-import { Injectable, Param } from '@nestjs/common';
+import { Injectable, Param, Query } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Post } from './post.entity';
 import { ApiResponseDto } from 'src/common/dto/response.dto';
 import { User } from 'src/user/user.entity';
+import { Like } from 'src/like/like.entity';
+import { Bookmark } from 'src/bookmark/bookmark.entity';
 
 @Injectable()
 export class PostService {
@@ -16,6 +18,12 @@ export class PostService {
 
     @InjectRepository(User) // user Repo도 추가
     private userRepository: Repository<User>,
+
+    @InjectRepository(Like) // like Repo도 추가
+    private likeRepository: Repository<Like>,
+
+    @InjectRepository(Bookmark) // bookmark Repo도 추가
+    private bookmarkRepository: Repository<Bookmark>,
   ) {}
 
   async getAllPosts(): Promise<ApiResponseDto<Post[]>> {
@@ -134,6 +142,7 @@ export class PostService {
 
   async getUserPosts(
     @Param('user_id') user_id: string,
+    @Query('type') type: string,
   ): Promise<ApiResponseDto<Post[]>> {
     try {
       const findUser = await this.userRepository.findOne({
@@ -151,35 +160,51 @@ export class PostService {
         };
       }
 
-      const posts = await this.postRepository
-        .createQueryBuilder('post')
-        .leftJoinAndSelect('post.user', 'user')
-        .leftJoinAndSelect('post.likes', 'likes')
-        .leftJoinAndSelect('post.bookmarks', 'bookmarks')
-        .leftJoinAndSelect('likes.post', 'likesPost')
-        .leftJoinAndSelect('likes.user', 'likesUser')
-        .leftJoinAndSelect('bookmarks.post', 'bookmarksPost')
-        .leftJoinAndSelect('bookmarks.user', 'bookmarksUser')
-        .select([
-          'post.id',
-          'post.image_url',
-          'post.description',
-          'post.created_at',
-          'user.id',
-          'user.username',
-          'user.email',
-          'user.image_url',
-          'likes.id',
-          'likes.created_at',
-          'likesPost.id',
-          'likesUser.id',
-          'bookmarks.id',
-          'bookmarks.created_at',
-          'bookmarksPost.id',
-          'bookmarksUser.id',
-        ])
-        .where('post.user_id = :user_id', { user_id })
-        .getMany();
+      let posts;
+
+      if (type === 'liked') {
+        const likePosts = await this.likeRepository
+          .createQueryBuilder('like')
+          .leftJoinAndSelect('like.post', 'post')
+          .select([
+            'like.id',
+            'post.id',
+            'post.image_url',
+            'post.description',
+            'post.created_at',
+          ])
+          .where('like.user_id = :user_id', { user_id })
+          .getMany();
+
+        posts = likePosts.map((bookmark) => bookmark.post);
+      } else if (type === 'saved') {
+        const bookmarksPosts = await this.bookmarkRepository
+          .createQueryBuilder('bookmark')
+          .leftJoinAndSelect('bookmark.post', 'post')
+          .select([
+            'bookmark.id',
+            'post.id',
+            'post.image_url',
+            'post.description',
+            'post.created_at',
+          ])
+          .where('bookmark.user_id = :user_id', { user_id })
+          .getMany();
+
+        posts = bookmarksPosts.map((bookmark) => bookmark.post);
+      } else {
+        posts = await this.postRepository
+          .createQueryBuilder('post')
+          .leftJoinAndSelect('post.user', 'user')
+          .select([
+            'post.id',
+            'post.image_url',
+            'post.description',
+            'post.created_at',
+          ])
+          .where('post.user_id = :user_id', { user_id })
+          .getMany();
+      }
 
       return {
         data: posts,
