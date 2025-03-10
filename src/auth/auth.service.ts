@@ -181,7 +181,7 @@ export class AuthService {
 
   async deleteUser(
     @Param('id') id: string,
-    @Req() res: Request,
+    @Req() req: Request,
   ): Promise<ApiResponseDto<null>> {
     try {
       const findUser = await this.userRepository.findOne({
@@ -214,7 +214,7 @@ export class AuthService {
       console.error(error);
 
       /** jwt 미들웨어에서 넘겨준 유저 정보 */
-      const email = res['user'].email;
+      const email = req['user'].email;
 
       return {
         data: null,
