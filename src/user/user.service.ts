@@ -63,9 +63,9 @@ export class UserService {
     }
   }
 
-  async searchUsers(searchWord: string): Promise<ApiResponseDto<User[]>> {
+  async searchUsers(text: string): Promise<ApiResponseDto<User[]>> {
     try {
-      if (!searchWord) {
+      if (!text) {
         // 검색어가 없으면 전체 데이터를 가져오되, LIMIT 10 적용
         const users = await this.userRepository.find({
           take: 10, // 최대 10개 제한
@@ -79,11 +79,8 @@ export class UserService {
       }
 
       const findUsers = await this.userRepository.find({
-        where: [
-          { username: Like(`%${searchWord}%`) },
-          { email: Like(`%${searchWord}%`) },
-        ],
-        take: 10, // LIMIT 10
+        where: [{ username: Like(`%${text}%`) }, { email: Like(`%${text}%`) }],
+        take: 10,
       });
 
       return {

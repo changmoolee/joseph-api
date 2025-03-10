@@ -12,15 +12,15 @@ export class UserController {
     return this.userService.getAllUsers();
   }
 
+  @Get('search')
+  async searchUsers(
+    @Query('text') text: string,
+  ): Promise<ApiResponseDto<User[]>> {
+    return this.userService.searchUsers(text || '');
+  }
+
   @Get(':id')
   async getUser(@Param('id') id: string): Promise<ApiResponseDto<User>> {
     return this.userService.getUser(id);
-  }
-
-  @Get('search')
-  async searchUsers(
-    @Query('searchWord') searchWord: string,
-  ): Promise<ApiResponseDto<User[]>> {
-    return this.userService.searchUsers(searchWord || '');
   }
 }
