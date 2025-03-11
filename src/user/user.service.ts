@@ -35,9 +35,21 @@ export class UserService {
 
   async getUser(@Param('id') id: string): Promise<ApiResponseDto<User>> {
     try {
-      const findUser = await this.userRepository.findOne({
-        where: { id: parseInt(id) },
-      });
+      const findUser = await this.userRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.posts', 'posts')
+        .leftJoinAndSelect('user.follower', 'follower')
+        .leftJoinAndSelect('user.following', 'following')
+        .select([
+          'user.id',
+          'user.username',
+          'user.image_url',
+          'posts.id',
+          'follower.id',
+          'following.id',
+        ])
+        .where('user.id = :id', { id })
+        .getOne();
 
       if (!findUser) {
         return {
