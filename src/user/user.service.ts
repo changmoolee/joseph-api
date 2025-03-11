@@ -1,7 +1,7 @@
 import { ApiResponseDto } from './../common/dto/response.dto';
 import { Injectable, Param } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
+import { Repository } from 'typeorm';
 import { User } from './user.entity';
 
 @Injectable()
@@ -79,9 +79,19 @@ export class UserService {
     try {
       if (!text) {
         // 검색어가 없으면 전체 데이터를 가져오되, LIMIT 10 적용
-        const users = await this.userRepository.find({
-          take: 10, // 최대 10개 제한
-        });
+        const users = await this.userRepository
+          .createQueryBuilder('user')
+          .leftJoinAndSelect('user.follower', 'follower')
+          .leftJoinAndSelect('user.following', 'following')
+          .select([
+            'user.id',
+            'user.username',
+            'user.image_url',
+            'follower.id',
+            'following.id',
+          ])
+          .take(10)
+          .getMany();
 
         return {
           data: users,
@@ -90,10 +100,21 @@ export class UserService {
         };
       }
 
-      const findUsers = await this.userRepository.find({
-        where: [{ username: Like(`%${text}%`) }, { email: Like(`%${text}%`) }],
-        take: 10,
-      });
+      const findUsers = await this.userRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.follower', 'follower')
+        .leftJoinAndSelect('user.following', 'following')
+        .select([
+          'user.id',
+          'user.username',
+          'user.image_url',
+          'follower.id',
+          'following.id',
+        ])
+        .where('user.username LIKE :username', { username: `%${text}%` })
+        .orWhere('user.email LIKE :email', { email: `%${text}%` })
+        .take(10)
+        .getMany();
 
       return {
         data: findUsers,
