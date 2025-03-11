@@ -1,4 +1,5 @@
 import { Bookmark } from 'src/bookmark/bookmark.entity';
+import { Follow } from 'src/follow/follow.entity';
 import { Like } from 'src/like/like.entity';
 import { Post } from 'src/post/post.entity';
 import {
@@ -49,4 +50,12 @@ export class User {
   // 한 명의 user가 여러 개의 bookmark를 설정할 수 있음 (일 대 다 관계)
   @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
   bookmarks: Bookmark[];
+
+  // 한 명의 user가 여러 회원을 팔로우할 수 있음 (일 대 다 관계)
+  @OneToMany(() => Follow, (follow) => follow.follower)
+  follower: Follow[];
+
+  // 한 명의 user에게 여러 회원이 팔로우할 수 있음 (일 대 다 관계)
+  @OneToMany(() => Follow, (follow) => follow.following)
+  following: Follow[];
 }

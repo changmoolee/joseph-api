@@ -14,6 +14,8 @@ import { BookmarkModule } from 'src/bookmark/bookmark.module';
 import { Bookmark } from 'src/bookmark/bookmark.entity';
 import { CommentModule } from 'src/comment/comment.module';
 import { Comment } from 'src/comment/comment.entity';
+import { FollowModule } from 'src/follow/follow.module';
+import { Follow } from 'src/follow/follow.entity';
 
 // 개발환경 여부
 const isDevelopment = process.env.NODE_ENV === 'development';
@@ -34,7 +36,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
         ? process.env.LOCAL_DATABASE_PASSWORD
         : process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
-      entities: [User, Post, Like, Bookmark, Comment], // 엔티티 추가 필수
+      entities: [User, Post, Like, Bookmark, Comment, Follow], // 엔티티 추가 필수
       synchronize: true,
     }),
     // 모듈 추가 필수
@@ -44,6 +46,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
     LikeModule,
     BookmarkModule,
     CommentModule,
+    FollowModule,
   ],
   controllers: [AppController],
   providers: [AppService],
