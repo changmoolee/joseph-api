@@ -1,4 +1,5 @@
 import { Bookmark } from 'src/bookmark/bookmark.entity';
+import { Follow } from 'src/follow/follow.entity';
 import { Like } from 'src/like/like.entity';
 import { Post } from 'src/post/post.entity';
 import {
@@ -7,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   OneToMany,
+  DeleteDateColumn,
 } from 'typeorm';
 
 // 클래스(User)를 MySQL의 users 테이블과 연결
@@ -33,6 +35,10 @@ export class User {
   @CreateDateColumn()
   created_at: Date;
 
+  // deleted_at 필드는 유저 탈퇴(소프트 삭제)시 생성된다. 해당 필드가 채워져 있으면 각 검색 쿼리에서 제외된다.
+  @DeleteDateColumn()
+  deleted_at: Date;
+
   // 한 명의 user가 여러 개의 posts를 가질 수 있음 (일 대 다 관계)
   @OneToMany(() => Post, (post) => post.user)
   posts: Post[];
@@ -44,4 +50,12 @@ export class User {
   // 한 명의 user가 여러 개의 bookmark를 설정할 수 있음 (일 대 다 관계)
   @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
   bookmarks: Bookmark[];
+
+  // 한 명의 user가 여러 회원을 팔로우할 수 있음 (일 대 다 관계)
+  @OneToMany(() => Follow, (follow) => follow.follower)
+  follower: Follow[];
+
+  // 한 명의 user에게 여러 회원이 팔로우할 수 있음 (일 대 다 관계)
+  @OneToMany(() => Follow, (follow) => follow.following)
+  following: Follow[];
 }

@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -10,6 +11,9 @@ async function bootstrap() {
     process.env.NODE_ENV === 'development'
       ? process.env.DEVELOPMENT.split(',')
       : process.env.JOSEPH_INSTAGRAM.split(',');
+
+  // cookie-parser
+  app.use(cookieParser());
 
   app.enableCors({
     origin: allowedOrigins,

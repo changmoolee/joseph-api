@@ -32,6 +32,7 @@ export class CommentService {
           'user.username',
           'user.email',
           'user.image_url',
+          'user.deleted_at',
         ])
         .where('comment.post_id = :post_id', { post_id })
         .getMany();
@@ -44,8 +45,13 @@ export class CommentService {
         };
       }
 
+      /** 탈퇴회원의 댓글 필터링 */
+      const validComments = findComments.filter(
+        (comment) => comment.user.deleted_at === null,
+      );
+
       return {
-        data: findComments,
+        data: validComments,
         result: 'success',
         message: `post_id : ${post_id}의 댓글 조회를 성공하였습니다.`,
       };
@@ -90,13 +96,14 @@ export class CommentService {
   }
 
   async updateComment(
+    @Param('id') id: string,
     @Body() commentDto: UpdateCommentDto,
   ): Promise<ApiResponseDto<null>> {
     try {
       // 수정할 댓글
       const findComment = await this.commentRepository.findOne({
         where: {
-          id: commentDto.id,
+          id: parseInt(id),
         },
       });
 

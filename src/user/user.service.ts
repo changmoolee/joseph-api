@@ -1,7 +1,7 @@
 import { ApiResponseDto } from './../common/dto/response.dto';
 import { Injectable, Param } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
+import { Repository } from 'typeorm';
 import { User } from './user.entity';
 
 @Injectable()
@@ -35,11 +35,23 @@ export class UserService {
 
   async getUser(@Param('id') id: string): Promise<ApiResponseDto<User>> {
     try {
-      const user = await this.userRepository.findOne({
-        where: { id: parseInt(id) },
-      });
+      const findUser = await this.userRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.posts', 'posts')
+        .leftJoinAndSelect('user.follower', 'follower')
+        .leftJoinAndSelect('user.following', 'following')
+        .select([
+          'user.id',
+          'user.username',
+          'user.image_url',
+          'posts.id',
+          'follower.id',
+          'following.id',
+        ])
+        .where('user.id = :id', { id })
+        .getOne();
 
-      if (!user) {
+      if (!findUser) {
         return {
           data: null,
           result: 'failure',
@@ -48,7 +60,7 @@ export class UserService {
       }
 
       return {
-        data: user,
+        data: findUser,
         result: 'success',
         message: '회원 데이터 호출 완료',
       };
@@ -63,13 +75,23 @@ export class UserService {
     }
   }
 
-  async searchUsers(searchWord: string): Promise<ApiResponseDto<User[]>> {
+  async searchUsers(text: string): Promise<ApiResponseDto<User[]>> {
     try {
-      if (!searchWord) {
+      if (!text) {
         // 검색어가 없으면 전체 데이터를 가져오되, LIMIT 10 적용
-        const users = await this.userRepository.find({
-          take: 10, // 최대 10개 제한
-        });
+        const users = await this.userRepository
+          .createQueryBuilder('user')
+          .leftJoinAndSelect('user.follower', 'follower')
+          .leftJoinAndSelect('user.following', 'following')
+          .select([
+            'user.id',
+            'user.username',
+            'user.image_url',
+            'follower.id',
+            'following.id',
+          ])
+          .take(10)
+          .getMany();
 
         return {
           data: users,
@@ -78,16 +100,24 @@ export class UserService {
         };
       }
 
-      const users = await this.userRepository.find({
-        where: [
-          { username: Like(`%${searchWord}%`) },
-          { email: Like(`%${searchWord}%`) },
-        ],
-        take: 10, // LIMIT 10
-      });
+      const findUsers = await this.userRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.follower', 'follower')
+        .leftJoinAndSelect('user.following', 'following')
+        .select([
+          'user.id',
+          'user.username',
+          'user.image_url',
+          'follower.id',
+          'following.id',
+        ])
+        .where('user.username LIKE :username', { username: `%${text}%` })
+        .orWhere('user.email LIKE :email', { email: `%${text}%` })
+        .take(10)
+        .getMany();
 
       return {
-        data: users,
+        data: findUsers,
         result: 'success',
         message: '',
       };

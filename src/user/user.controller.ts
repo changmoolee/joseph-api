@@ -14,9 +14,9 @@ export class UserController {
 
   @Get('search')
   async searchUsers(
-    @Query('searchWord') searchWord: string,
+    @Query('text') text: string,
   ): Promise<ApiResponseDto<User[]>> {
-    return this.userService.searchUsers(searchWord || '');
+    return this.userService.searchUsers(text || '');
   }
 
   @Get(':id')
