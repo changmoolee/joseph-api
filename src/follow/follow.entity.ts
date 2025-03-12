@@ -5,26 +5,31 @@ import {
   CreateDateColumn,
   JoinColumn,
   ManyToOne,
+  RelationId,
 } from 'typeorm';
 
 // 클래스(Like)를 MySQL의 likes 테이블과 연결
 @Entity('follows')
 export class Follow {
-  // id 필드가 자동 증가(Auto Increment) 되는 기본 키 설정
   @PrimaryGeneratedColumn()
   id: number;
 
-  // created_at 필드는 좋아요 생성시 자동으로 현재 날짜/시간이 저장됨 (DEFAULT CURRENT_TIMESTAMP)
   @CreateDateColumn()
   created_at: Date;
 
-  // 팔로우 하는 회원
-  @ManyToOne(() => User, (user) => user.likes, { onDelete: 'CASCADE' })
+  // 특정 회원을 팔로우 하는 회원
+  @ManyToOne(() => User, (user) => user.followings, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'follower_id' })
   follower: User;
 
-  // 팔로잉 당하는 회원
-  @ManyToOne(() => User, (user) => user.likes, { onDelete: 'CASCADE' })
+  @RelationId((follow: Follow) => follow.follower)
+  follower_id: number;
+
+  // 팔로잉 당하는 특정 회원
+  @ManyToOne(() => User, (user) => user.followers, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'following_id' })
   following: User;
+
+  @RelationId((follow: Follow) => follow.following)
+  following_id: number;
 }

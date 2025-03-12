@@ -29,10 +29,10 @@ export class FollowService {
       const findFollow = await this.followRepository.findOne({
         where: {
           follower: {
-            id: followDto.user_id,
+            id: user_id,
           },
           following: {
-            id: user_id,
+            id: followDto.user_id,
           },
         },
       });
@@ -43,10 +43,10 @@ export class FollowService {
           .delete()
           .where({
             follower: {
-              id: followDto.user_id,
+              id: user_id,
             },
             following: {
-              id: user_id,
+              id: followDto.user_id,
             },
           })
           .execute();
@@ -62,10 +62,10 @@ export class FollowService {
           .insert()
           .values({
             follower: {
-              id: followDto.user_id,
+              id: user_id,
             },
             following: {
-              id: user_id,
+              id: followDto.user_id,
             },
           })
           .execute();
@@ -115,15 +115,15 @@ export class FollowService {
         followerUsersInfo = await this.userRepository
           .createQueryBuilder('user')
           .leftJoinAndSelect('user.posts', 'posts')
-          .leftJoinAndSelect('user.follower', 'follower')
-          .leftJoinAndSelect('user.following', 'following')
+          .leftJoinAndSelect('user.followers', 'followers')
+          .leftJoinAndSelect('user.followings', 'followings')
           .select([
             'user.id',
             'user.username',
             'user.image_url',
             'posts.id',
-            'follower.id',
-            'following.id',
+            'followers.id',
+            'followings.id',
           ])
           .where('user.id IN (:...id)', { id: followerUsers })
           .getMany();
@@ -148,15 +148,15 @@ export class FollowService {
         followingUsersInfo = await this.userRepository
           .createQueryBuilder('user')
           .leftJoinAndSelect('user.posts', 'posts')
-          .leftJoinAndSelect('user.follower', 'follower')
-          .leftJoinAndSelect('user.following', 'following')
+          .leftJoinAndSelect('user.followers', 'followers')
+          .leftJoinAndSelect('user.followings', 'followings')
           .select([
             'user.id',
             'user.username',
             'user.image_url',
             'posts.id',
-            'follower.id',
-            'following.id',
+            'followers.id',
+            'followings.id',
           ])
           .where('user.id IN (:...id)', { id: followingUsers })
           .getMany();
