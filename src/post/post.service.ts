@@ -1,4 +1,4 @@
-import { Injectable, Param, Query } from '@nestjs/common';
+import { Body, Injectable, Param, Query, Req } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Post } from './post.entity';
@@ -6,6 +6,7 @@ import { ApiResponseDto } from 'src/common/dto/response.dto';
 import { User } from 'src/user/user.entity';
 import { Like } from 'src/like/like.entity';
 import { Bookmark } from 'src/bookmark/bookmark.entity';
+import { MakePostDto } from 'src/post/dto/make-post.dto';
 
 @Injectable()
 export class PostService {
@@ -58,24 +59,8 @@ export class PostService {
         ])
         .getMany();
 
-      // 탈퇴회원의 게시물 제외
-      const validUserPosts = posts.filter(
-        (post) => post.user.deleted_at === null,
-      );
-
-      // 탈퇴회원의 좋아요, 북마크 제외
-      const validLikeBookmarkPosts = validUserPosts.map((post) => ({
-        ...post,
-        likes: post.likes.filter(
-          (like) => like.user && like.user.deleted_at === null,
-        ),
-        bookmarks: post.bookmarks.filter(
-          (bookmark) => bookmark.user && bookmark.user.deleted_at === null,
-        ),
-      }));
-
       return {
-        data: validLikeBookmarkPosts,
+        data: posts,
         result: 'success',
         message: '게시글을 성공적으로 가져왔습니다.',
       };
@@ -218,6 +203,40 @@ export class PostService {
         data: [],
         result: 'failure',
         message: '게시글을 불러오는 중 오류가 발생했습니다.',
+      };
+    }
+  }
+
+  async makePost(
+    @Req() req: Request,
+    @Body() postDto: MakePostDto,
+  ): Promise<ApiResponseDto<null>> {
+    /** jwt 미들웨어에서 넘겨준 유저 정보 */
+    const userinfo = req['user'];
+
+    try {
+      await this.postRepository
+        .createQueryBuilder('post')
+        .insert()
+        .into(Post)
+        .values({
+          user: { id: userinfo.id },
+          image_url: postDto.image_url,
+          description: postDto.description,
+        })
+        .execute();
+
+      return {
+        data: null,
+        result: 'success',
+        message: '게시글을 생성하였습니다.',
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        data: null,
+        result: 'failure',
+        message: '게시글 생성을 실패하였습니다.',
       };
     }
   }
