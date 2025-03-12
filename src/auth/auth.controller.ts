@@ -35,6 +35,11 @@ export class AuthController {
     return this.authService.signinUser(userDto, response);
   }
 
+  @Post('signout')
+  async signoutUser(@Res() response: Response): Promise<void> {
+    return this.authService.signoutUser(response);
+  }
+
   @Put('user/:id')
   async updateUser(
     @Param('id') id: string,
