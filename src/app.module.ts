@@ -37,7 +37,6 @@ const isDevelopment = process.env.NODE_ENV === 'development';
         : process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
       entities: [User, Post, Like, Bookmark, Comment, Follow], // 엔티티 추가 필수
-      synchronize: true,
     }),
     // 모듈 추가 필수
     UserModule,

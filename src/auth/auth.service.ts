@@ -130,6 +130,16 @@ export class AuthService {
     }
   }
 
+  async signoutUser(response: Response) {
+    response.clearCookie('token');
+
+    response.json({
+      data: null,
+      result: 'success',
+      message: '로그아웃하였습니다.',
+    });
+  }
+
   async updateUser(
     @Param('id') id: string,
     @Body() userDto: UpdateUserDto,

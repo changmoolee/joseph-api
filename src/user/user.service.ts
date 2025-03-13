@@ -38,15 +38,19 @@ export class UserService {
       const findUser = await this.userRepository
         .createQueryBuilder('user')
         .leftJoinAndSelect('user.posts', 'posts')
-        .leftJoinAndSelect('user.follower', 'follower')
-        .leftJoinAndSelect('user.following', 'following')
+        .leftJoinAndSelect('user.followers', 'followers')
+        .leftJoinAndSelect('followers.follower', 'followerUser')
+        .leftJoinAndSelect('user.followings', 'followings')
+        .leftJoinAndSelect('followings.following', 'followingUser')
         .select([
           'user.id',
           'user.username',
           'user.image_url',
           'posts.id',
-          'follower.id',
-          'following.id',
+          'followers.id', // 팔로워 id
+          'followerUser.id',
+          'followings.id', // 팔로잉 id
+          'followingUser.id',
         ])
         .where('user.id = :id', { id })
         .getOne();

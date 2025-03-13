@@ -25,6 +25,7 @@ export class AuthModule implements NestModule {
     consumer
       .apply(JwtMiddleware)
       .forRoutes(
+        { path: 'auth/signout', method: RequestMethod.POST },
         { path: 'auth/user/:id', method: RequestMethod.PUT },
         { path: 'auth/user/:id', method: RequestMethod.DELETE },
       );

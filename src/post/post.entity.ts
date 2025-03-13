@@ -34,7 +34,7 @@ export class Post {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @RelationId((post: Post) => post.user) // you need to specify target relation
+  @RelationId((post: Post) => post.user)
   user_id: number;
 
   // 하나의 post가 여러개의 likes를 참조 (다 대 일 관계)

@@ -51,11 +51,11 @@ export class User {
   @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
   bookmarks: Bookmark[];
 
-  // 한 명의 user가 여러 회원을 팔로우할 수 있음 (일 대 다 관계)
-  @OneToMany(() => Follow, (follow) => follow.follower)
-  follower: Follow[];
-
   // 한 명의 user에게 여러 회원이 팔로우할 수 있음 (일 대 다 관계)
   @OneToMany(() => Follow, (follow) => follow.following)
-  following: Follow[];
+  followers: Follow[];
+
+  // 한 명의 user가 여러 회원을 팔로우할 수 있음 (일 대 다 관계)
+  @OneToMany(() => Follow, (follow) => follow.follower)
+  followings: Follow[];
 }
