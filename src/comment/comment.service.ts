@@ -1,10 +1,9 @@
 import { ApiResponseDto } from '../common/dto/response.dto';
-import { Body, Injectable, Param } from '@nestjs/common';
+import { Body, Injectable, Param, Req } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Comment } from './comment.entity';
 import { MakeCommentDto } from 'src/comment/dto/make-comment.dto';
-import { UpdateCommentDto } from 'src/comment/dto/update-comment.dto';
 
 @Injectable()
 export class CommentService {
@@ -66,12 +65,17 @@ export class CommentService {
   }
 
   async makeComment(
+    @Param('id') id: number,
     @Body() commentDto: MakeCommentDto,
+    @Req() req: Request,
   ): Promise<ApiResponseDto<null>> {
+    /** jwt 미들웨어에서 넘겨준 유저 정보 */
+    const userinfo = req['user'];
+
     try {
       const newComment = await this.commentRepository.create({
-        user: { id: commentDto.user_id },
-        post: { id: commentDto.post_id },
+        post: { id },
+        user: { id: userinfo.id },
         content: commentDto.content,
         ...(commentDto.parent_comment_id && {
           parent_comment_id: commentDto.parent_comment_id,

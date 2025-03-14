@@ -1,8 +1,15 @@
-import { Controller, Post, Body, Put, Get, Param } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  Delete,
+  Req,
+} from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { ApiResponseDto } from 'src/common/dto/response.dto';
 import { MakeCommentDto } from 'src/comment/dto/make-comment.dto';
-import { UpdateCommentDto } from 'src/comment/dto/update-comment.dto';
 import { Comment } from 'src/comment/comment.entity';
 
 @Controller('comment')
@@ -16,11 +23,13 @@ export class CommentController {
     return this.commentService.getComments(post_id);
   }
 
-  @Post('post')
+  @Post('post/:id')
   async makeComment(
+    @Param('id') id: number,
     @Body() commentDto: MakeCommentDto,
+    @Req() req: Request,
   ): Promise<ApiResponseDto<null>> {
-    return this.commentService.makeComment(commentDto);
+    return this.commentService.makeComment(id, commentDto, req);
   }
 
   @Delete('post/:id')
