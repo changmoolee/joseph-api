@@ -85,14 +85,14 @@ export class UserService {
         // 검색어가 없으면 전체 데이터를 가져오되, LIMIT 10 적용
         const users = await this.userRepository
           .createQueryBuilder('user')
-          .leftJoinAndSelect('user.follower', 'follower')
-          .leftJoinAndSelect('user.following', 'following')
+          .leftJoinAndSelect('user.followers', 'followers')
+          .leftJoinAndSelect('user.followings', 'followings')
           .select([
             'user.id',
             'user.username',
             'user.image_url',
-            'follower.id',
-            'following.id',
+            'followers.id',
+            'followings.id',
           ])
           .take(10)
           .getMany();
@@ -100,20 +100,20 @@ export class UserService {
         return {
           data: users,
           result: 'success',
-          message: '',
+          message: '회원 검색을 성공하였습니다.',
         };
       }
 
       const findUsers = await this.userRepository
         .createQueryBuilder('user')
-        .leftJoinAndSelect('user.follower', 'follower')
-        .leftJoinAndSelect('user.following', 'following')
+        .leftJoinAndSelect('user.followers', 'followers')
+        .leftJoinAndSelect('user.followings', 'followings')
         .select([
           'user.id',
           'user.username',
           'user.image_url',
-          'follower.id',
-          'following.id',
+          'followers.id',
+          'followings.id',
         ])
         .where('user.username LIKE :username', { username: `%${text}%` })
         .orWhere('user.email LIKE :email', { email: `%${text}%` })
@@ -123,13 +123,14 @@ export class UserService {
       return {
         data: findUsers,
         result: 'success',
-        message: '',
+        message: '회원 검색을 성공하였습니다.',
       };
     } catch (error) {
+      console.error(error);
       return {
         data: [],
         result: 'failure',
-        message: error.message,
+        message: '회원 검색을 실패하였습니다.',
       };
     }
   }
