@@ -22,6 +22,10 @@ export class PostModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(JwtMiddleware)
-      .forRoutes({ path: 'post', method: RequestMethod.POST });
+      .forRoutes(
+        { path: 'post', method: RequestMethod.POST },
+        { path: 'post/:id', method: RequestMethod.PUT },
+        { path: 'post/:id', method: RequestMethod.DELETE },
+      );
   }
 }

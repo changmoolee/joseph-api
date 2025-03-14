@@ -240,4 +240,90 @@ export class PostService {
       };
     }
   }
+
+  async updatePost(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() postDto: MakePostDto,
+  ): Promise<ApiResponseDto<null>> {
+    /** jwt 미들웨어에서 넘겨준 유저 정보 */
+    const userinfo = req['user'];
+
+    try {
+      const findPost = await this.postRepository.findOne({
+        where: { id: parseInt(id), user: { id: userinfo.id } },
+      });
+
+      if (!findPost) {
+        return {
+          data: null,
+          result: 'failure',
+          message: `post_id: ${id} 수정할 게시글이 존재하지 않습니다.`,
+        };
+      }
+
+      await this.postRepository
+        .createQueryBuilder('post')
+        .where('id = :id', { id: findPost.id })
+        .update({
+          image_url: postDto.image_url,
+          description: postDto.description,
+        })
+        .execute();
+
+      return {
+        data: null,
+        result: 'success',
+        message: `post_id: ${findPost.id} 게시글을 수정하였습니다.`,
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        data: null,
+        result: 'failure',
+        message: `post_id: ${id} 게시글 수정을 실패하였습니다.`,
+      };
+    }
+  }
+
+  async deletePost(
+    @Req() req: Request,
+    @Param('id') id: string,
+  ): Promise<ApiResponseDto<null>> {
+    /** jwt 미들웨어에서 넘겨준 유저 정보 */
+    const userinfo = req['user'];
+
+    try {
+      const findPost = await this.postRepository.findOne({
+        where: { id: parseInt(id), user: { id: userinfo.id } },
+      });
+
+      if (!findPost) {
+        return {
+          data: null,
+          result: 'failure',
+          message: `post_id: ${id} 삭제할 게시물이 존재하지 않습니다.`,
+        };
+      }
+
+      await this.postRepository
+        .createQueryBuilder('post')
+        .where('id = :id', { id: findPost.id })
+        .delete()
+        .execute();
+
+      return {
+        data: null,
+        result: 'success',
+        message: `post_id: ${findPost.id} 게시글을 삭제하였습니다.`,
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        data: null,
+        result: 'failure',
+        message: `post_id: ${id} 게시글 수정을 실패하였습니다.`,
+      };
+    }
+  }
 }
