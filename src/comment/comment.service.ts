@@ -95,42 +95,48 @@ export class CommentService {
     }
   }
 
-  async updateComment(
+  async deleteComment(
     @Param('id') id: string,
-    @Body() commentDto: UpdateCommentDto,
+    @Req() req: Request,
   ): Promise<ApiResponseDto<null>> {
+    /** jwt 미들웨어에서 넘겨준 유저 정보 */
+    const userinfo = req['user'];
+
     try {
-      // 수정할 댓글
+      // 삭제할 댓글
       const findComment = await this.commentRepository.findOne({
         where: {
           id: parseInt(id),
+          user: { id: userinfo.id },
         },
       });
 
-      // 댓글 id가 없을 경우 에러
+      // 조회된 댓글이 없을 경우 에러
       if (!findComment) {
         return {
           data: null,
           result: 'failure',
-          message: '수정할 댓글 id가 존재하지 않습니다.',
+          message: '삭제할 댓글이 존재하지 않습니다.',
         };
       }
 
-      findComment.content = commentDto.content;
-
-      await this.commentRepository.save(findComment);
+      await this.commentRepository
+        .createQueryBuilder('comment')
+        .where('id = :id', { id: findComment.id })
+        .delete()
+        .execute();
 
       return {
         data: null,
         result: 'success',
-        message: '댓글을 수정하였습니다.',
+        message: '댓글을 삭제하였습니다.',
       };
     } catch (error) {
       console.error(error);
       return {
         data: null,
         result: 'failure',
-        message: '댓글 수정을 실패하였습니다.',
+        message: `id:${id} 댓글 삭제를 실패하였습니다.`,
       };
     }
   }

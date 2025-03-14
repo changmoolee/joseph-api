@@ -23,11 +23,11 @@ export class CommentController {
     return this.commentService.makeComment(commentDto);
   }
 
-  @Put('post/:id')
-  async updateComment(
+  @Delete('post/:id')
+  async deleteComment(
     @Param('id') id: string,
-    @Body() commentDto: UpdateCommentDto,
+    @Req() req: Request,
   ): Promise<ApiResponseDto<null>> {
-    return this.commentService.updateComment(id, commentDto);
+    return this.commentService.deleteComment(id, req);
   }
 }

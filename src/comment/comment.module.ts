@@ -22,6 +22,7 @@ export class CommentModule implements NestModule {
       .forRoutes(
         { path: 'comment/post', method: RequestMethod.POST },
         { path: 'comment/post/:id', method: RequestMethod.PUT },
+        { path: 'comment/post/:id', method: RequestMethod.DELETE },
       );
   }
 }
