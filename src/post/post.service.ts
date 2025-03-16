@@ -57,6 +57,7 @@ export class PostService {
           'bookmarkUser.username',
           'bookmarkUser.deleted_at',
         ])
+        .where('user.deleted_at IS NULL') // 탈퇴회원 필터링
         .getMany();
 
       return {
@@ -109,6 +110,14 @@ export class PostService {
         ])
         .getOne();
 
+      if (!post) {
+        return {
+          data: null,
+          result: 'failure',
+          message: '게시글이 존재하지 않습니다.',
+        };
+      }
+
       return {
         data: post,
         result: 'success',
@@ -151,32 +160,48 @@ export class PostService {
         const likePosts = await this.likeRepository
           .createQueryBuilder('like')
           .leftJoinAndSelect('like.post', 'post')
+          .leftJoinAndSelect('post.user', 'postUser')
           .select([
             'like.id',
             'post.id',
             'post.image_url',
             'post.description',
             'post.created_at',
+            'postUser.id',
+            'postUser.deleted_at',
           ])
           .where('like.user_id = :user_id', { user_id })
           .getMany();
 
-        posts = likePosts.map((bookmark) => bookmark.post);
+        /** 탈퇴회원 필터링 */
+        const filteredLikePosts = likePosts.filter(
+          (bookmark) => bookmark.post?.user !== null,
+        );
+
+        posts = filteredLikePosts.map((bookmark) => bookmark.post);
       } else if (type === 'saved') {
         const bookmarksPosts = await this.bookmarkRepository
           .createQueryBuilder('bookmark')
           .leftJoinAndSelect('bookmark.post', 'post')
+          .leftJoinAndSelect('post.user', 'postUser')
           .select([
             'bookmark.id',
             'post.id',
             'post.image_url',
             'post.description',
             'post.created_at',
+            'postUser.id',
+            'postUser.deleted_at',
           ])
           .where('bookmark.user_id = :user_id', { user_id })
           .getMany();
 
-        posts = bookmarksPosts.map((bookmark) => bookmark.post);
+        /** 탈퇴회원 필터링 */
+        const filteredBookmarks = bookmarksPosts.filter(
+          (bookmark) => bookmark.post?.user !== null,
+        );
+
+        posts = filteredBookmarks.map((bookmark) => bookmark.post);
       } else {
         posts = await this.postRepository
           .createQueryBuilder('post')
@@ -188,6 +213,7 @@ export class PostService {
             'post.created_at',
           ])
           .where('post.user_id = :user_id', { user_id })
+          .andWhere('user.deleted_at IS NULL')
           .getMany();
       }
 
