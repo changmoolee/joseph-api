@@ -6,6 +6,7 @@ import {
   Param,
   Delete,
   Req,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { ApiResponseDto } from 'src/common/dto/response.dto';
@@ -18,14 +19,14 @@ export class CommentController {
 
   @Get('post/:id')
   async getComments(
-    @Param('id') post_id: number,
+    @Param('id', ParseIntPipe) post_id: number,
   ): Promise<ApiResponseDto<Comment[]>> {
     return this.commentService.getComments(post_id);
   }
 
   @Post('post/:id')
   async makeComment(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() commentDto: MakeCommentDto,
     @Req() req: Request,
   ): Promise<ApiResponseDto<null>> {
@@ -34,7 +35,7 @@ export class CommentController {
 
   @Delete('post/:id')
   async deleteComment(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Req() req: Request,
   ): Promise<ApiResponseDto<null>> {
     return this.commentService.deleteComment(id, req);

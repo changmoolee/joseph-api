@@ -76,7 +76,7 @@ export class PostService {
     }
   }
 
-  async getPost(@Param('id') id: string): Promise<ApiResponseDto<Post>> {
+  async getPost(@Param('id') id: number): Promise<ApiResponseDto<Post>> {
     try {
       const post = await this.postRepository
         .createQueryBuilder('post')
@@ -85,7 +85,7 @@ export class PostService {
         .leftJoinAndSelect('post.bookmarks', 'bookmarks')
         .leftJoinAndSelect('likes.user', 'likeUser')
         .leftJoinAndSelect('bookmarks.user', 'bookmarkUser')
-        .where('post.id = :id', { id: parseInt(id) })
+        .where('post.id = :id', { id })
         .andWhere('user.deleted_at IS NULL')
         .select([
           'post.id',
@@ -135,12 +135,12 @@ export class PostService {
   }
 
   async getUserPosts(
-    @Param('user_id') user_id: string,
+    @Param('user_id') user_id: number,
     @Query('type') type: string,
   ): Promise<ApiResponseDto<Post[]>> {
     try {
       const findUser = await this.userRepository.findOne({
-        where: { id: parseInt(user_id) },
+        where: { id: user_id },
       });
 
       /** 회원의 탈퇴 여부 */
@@ -269,7 +269,7 @@ export class PostService {
 
   async updatePost(
     @Req() req: Request,
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() postDto: MakePostDto,
   ): Promise<ApiResponseDto<null>> {
     /** jwt 미들웨어에서 넘겨준 유저 정보 */
@@ -277,7 +277,7 @@ export class PostService {
 
     try {
       const findPost = await this.postRepository.findOne({
-        where: { id: parseInt(id), user: { id: userinfo.id } },
+        where: { id, user: { id: userinfo.id } },
       });
 
       if (!findPost) {
@@ -314,14 +314,14 @@ export class PostService {
 
   async deletePost(
     @Req() req: Request,
-    @Param('id') id: string,
+    @Param('id') id: number,
   ): Promise<ApiResponseDto<null>> {
     /** jwt 미들웨어에서 넘겨준 유저 정보 */
     const userinfo = req['user'];
 
     try {
       const findPost = await this.postRepository.findOne({
-        where: { id: parseInt(id), user: { id: userinfo.id } },
+        where: { id, user: { id: userinfo.id } },
       });
 
       if (!findPost) {

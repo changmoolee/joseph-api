@@ -86,7 +86,7 @@ export class FollowService {
     }
   }
 
-  async getUserFollow(@Param(':id') id: string): Promise<
+  async getUserFollow(@Param(':id') id: number): Promise<
     ApiResponseDto<{
       follower: any;
       following: any;

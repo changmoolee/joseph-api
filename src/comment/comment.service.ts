@@ -100,7 +100,7 @@ export class CommentService {
   }
 
   async deleteComment(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Req() req: Request,
   ): Promise<ApiResponseDto<null>> {
     /** jwt 미들웨어에서 넘겨준 유저 정보 */
@@ -110,7 +110,7 @@ export class CommentService {
       // 삭제할 댓글
       const findComment = await this.commentRepository.findOne({
         where: {
-          id: parseInt(id),
+          id,
           user: { id: userinfo.id },
         },
       });

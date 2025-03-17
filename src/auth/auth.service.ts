@@ -141,12 +141,12 @@ export class AuthService {
   }
 
   async updateUser(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() userDto: UpdateUserDto,
   ): Promise<ApiResponseDto<User>> {
     try {
       const findUser = await this.userRepository.findOne({
-        where: { id: parseInt(id), email: userDto.email },
+        where: { id, email: userDto.email },
       });
 
       if (!findUser) {
@@ -190,13 +190,13 @@ export class AuthService {
   }
 
   async deleteUser(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Req() req: Request,
   ): Promise<ApiResponseDto<null>> {
     try {
       const findUser = await this.userRepository.findOne({
         where: {
-          id: parseInt(id),
+          id,
         },
       });
 
@@ -209,7 +209,7 @@ export class AuthService {
       }
 
       await this.userRepository
-        .createQueryBuilder()
+        .createQueryBuilder('user')
         .softDelete()
         .where('id = :id', { id })
         .andWhere('email = :email', { email: findUser.email })

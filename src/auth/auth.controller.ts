@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Req,
@@ -42,7 +43,7 @@ export class AuthController {
 
   @Put('user/:id')
   async updateUser(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() usertDto: UpdateUserDto,
   ): Promise<ApiResponseDto<User | null>> {
     return this.authService.updateUser(id, usertDto);
@@ -50,7 +51,7 @@ export class AuthController {
 
   @Delete('user/:id')
   async deleteUser(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Req() req: Request,
   ): Promise<ApiResponseDto<null>> {
     return this.authService.deleteUser(id, req);
