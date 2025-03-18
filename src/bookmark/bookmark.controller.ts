@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Req } from '@nestjs/common';
 import { BookmarkService } from './bookmark.service';
 import { ApiResponseDto } from 'src/common/dto/response.dto';
 import { ExcuteBookMarkDto } from 'src/bookmark/dto/excute-bookmark.dto';
@@ -10,7 +10,8 @@ export class BookmarkController {
   @Post('post')
   async excuteLike(
     @Body() bookmarkDto: ExcuteBookMarkDto,
+    @Req() req: Request,
   ): Promise<ApiResponseDto<[]>> {
-    return this.likeService.excuteBookmark(bookmarkDto);
+    return this.likeService.excuteBookmark(bookmarkDto, req);
   }
 }

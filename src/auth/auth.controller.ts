@@ -3,9 +3,9 @@ import {
   Controller,
   Delete,
   Param,
+  ParseIntPipe,
   Post,
   Put,
-  Req,
   Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -42,7 +42,7 @@ export class AuthController {
 
   @Put('user/:id')
   async updateUser(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() usertDto: UpdateUserDto,
   ): Promise<ApiResponseDto<User | null>> {
     return this.authService.updateUser(id, usertDto);
@@ -50,9 +50,8 @@ export class AuthController {
 
   @Delete('user/:id')
   async deleteUser(
-    @Param('id') id: string,
-    @Req() req: Request,
+    @Param('id', ParseIntPipe) id: number,
   ): Promise<ApiResponseDto<null>> {
-    return this.authService.deleteUser(id, req);
+    return this.authService.deleteUser(id);
   }
 }

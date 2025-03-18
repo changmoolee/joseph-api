@@ -20,8 +20,9 @@ export class CommentModule implements NestModule {
     consumer
       .apply(JwtMiddleware)
       .forRoutes(
-        { path: 'comment/post', method: RequestMethod.POST },
+        { path: 'comment/post/:id', method: RequestMethod.POST },
         { path: 'comment/post/:id', method: RequestMethod.PUT },
+        { path: 'comment/post/:id', method: RequestMethod.DELETE },
       );
   }
 }

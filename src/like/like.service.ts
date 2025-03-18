@@ -1,5 +1,5 @@
 import { ApiResponseDto } from '../common/dto/response.dto';
-import { Body, Injectable } from '@nestjs/common';
+import { Body, Injectable, Req } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Like } from './like.entity';
@@ -17,53 +17,48 @@ export class LikeService {
 
   async excuteLike(
     @Body() likeDto: ExcuteLikeDto,
+    @Req() req: Request,
   ): Promise<ApiResponseDto<[]>> {
-    try {
-      const findLike = await this.likeRepository.findOne({
-        where: {
-          user: { id: likeDto.user_id },
-          post: { id: likeDto.post_id },
-        },
-      });
+    /** jwt 토큰 - 로그인한 회원의 id */
+    const user_id = req['user'].id;
 
-      if (findLike) {
-        await this.likeRepository
-          .createQueryBuilder()
-          .delete()
-          .from(Like)
-          .where({
-            id: findLike.id,
-          })
-          .execute();
+    const findLike = await this.likeRepository.findOne({
+      where: {
+        user: { id: user_id },
+        post: { id: likeDto.post_id },
+      },
+    });
 
-        return {
-          data: [],
-          result: 'success',
-          message: '좋아요를 해제하였습니다.',
-        };
-      } else {
-        await this.likeRepository
-          .createQueryBuilder()
-          .insert()
-          .into(Like)
-          .values({
-            user: { id: likeDto.user_id },
-            post: { id: likeDto.post_id },
-          })
-          .execute();
+    if (findLike) {
+      await this.likeRepository
+        .createQueryBuilder()
+        .delete()
+        .from(Like)
+        .where({
+          id: findLike.id,
+        })
+        .execute();
 
-        return {
-          data: [],
-          result: 'success',
-          message: '좋아요를 실행하였습니다.',
-        };
-      }
-    } catch (error) {
-      console.error(error);
       return {
         data: [],
-        result: 'failure',
-        message: '좋아요 실행을 실패하였습니다.',
+        result: 'success',
+        message: '좋아요를 해제하였습니다.',
+      };
+    } else {
+      await this.likeRepository
+        .createQueryBuilder()
+        .insert()
+        .into(Like)
+        .values({
+          user: { id: user_id },
+          post: { id: likeDto.post_id },
+        })
+        .execute();
+
+      return {
+        data: [],
+        result: 'success',
+        message: '좋아요를 실행하였습니다.',
       };
     }
   }
