@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Req } from '@nestjs/common';
 import { LikeService } from './like.service';
 import { ExcuteLikeDto } from 'src/like/dto/excute-like.dto';
 import { ApiResponseDto } from 'src/common/dto/response.dto';
@@ -10,7 +10,8 @@ export class LikeController {
   @Post('post')
   async excuteLike(
     @Body() likeDto: ExcuteLikeDto,
+    @Req() req: Request,
   ): Promise<ApiResponseDto<[]>> {
-    return this.likeService.excuteLike(likeDto);
+    return this.likeService.excuteLike(likeDto, req);
   }
 }

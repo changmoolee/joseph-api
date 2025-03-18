@@ -1,5 +1,5 @@
 import { ApiResponseDto } from '../common/dto/response.dto';
-import { Body, Injectable } from '@nestjs/common';
+import { Body, Injectable, Req } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Bookmark } from './bookmark.entity';
@@ -17,53 +17,48 @@ export class BookmarkService {
 
   async excuteBookmark(
     @Body() bookmarkDto: ExcuteBookMarkDto,
+    @Req() req: Request,
   ): Promise<ApiResponseDto<[]>> {
-    try {
-      const findLike = await this.bookmarkRepository.findOne({
-        where: {
-          user: { id: bookmarkDto.user_id },
-          post: { id: bookmarkDto.post_id },
-        },
-      });
+    /** jwt 토큰 - 로그인한 회원의 id */
+    const user_id = req['user'].id;
 
-      if (findLike) {
-        await this.bookmarkRepository
-          .createQueryBuilder()
-          .delete()
-          .from(Bookmark)
-          .where({
-            id: findLike.id,
-          })
-          .execute();
+    const findLike = await this.bookmarkRepository.findOne({
+      where: {
+        user: { id: user_id },
+        post: { id: bookmarkDto.post_id },
+      },
+    });
 
-        return {
-          data: [],
-          result: 'success',
-          message: '좋아요를 해제하였습니다.',
-        };
-      } else {
-        await this.bookmarkRepository
-          .createQueryBuilder()
-          .insert()
-          .into(Bookmark)
-          .values({
-            user: { id: bookmarkDto.user_id },
-            post: { id: bookmarkDto.post_id },
-          })
-          .execute();
+    if (findLike) {
+      await this.bookmarkRepository
+        .createQueryBuilder()
+        .delete()
+        .from(Bookmark)
+        .where({
+          id: findLike.id,
+        })
+        .execute();
 
-        return {
-          data: [],
-          result: 'success',
-          message: '좋아요를 실행하였습니다.',
-        };
-      }
-    } catch (error) {
-      console.error(error);
       return {
         data: [],
-        result: 'failure',
-        message: '좋아요 실행을 실패하였습니다.',
+        result: 'success',
+        message: '좋아요를 해제하였습니다.',
+      };
+    } else {
+      await this.bookmarkRepository
+        .createQueryBuilder()
+        .insert()
+        .into(Bookmark)
+        .values({
+          user: { id: bookmarkDto.user_id },
+          post: { id: bookmarkDto.post_id },
+        })
+        .execute();
+
+      return {
+        data: [],
+        result: 'success',
+        message: '좋아요를 실행하였습니다.',
       };
     }
   }

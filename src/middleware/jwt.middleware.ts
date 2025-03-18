@@ -1,4 +1,8 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
+import {
+  Injectable,
+  NestMiddleware,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import * as jose from 'jose';
 
@@ -9,11 +13,7 @@ export class JwtMiddleware implements NestMiddleware {
     const jwt = req.cookies.token;
 
     if (!jwt) {
-      res.status(401).json({
-        data: null,
-        result: 'failure',
-        message: '쿠키가 존재하지 않습니다.',
-      });
+      throw new UnauthorizedException('쿠키가 존재하지 않습니다.');
     }
 
     const JWT_SECRET = process.env.JWT_SECRET || '';
@@ -28,11 +28,7 @@ export class JwtMiddleware implements NestMiddleware {
       next();
     } catch (error) {
       console.error(error);
-      res.status(401).json({
-        data: null,
-        result: 'failure',
-        message: '인증되지 않는 쿠키입니다.',
-      });
+      throw new UnauthorizedException('인증되지 않는 쿠키입니다.');
     }
   }
 }
