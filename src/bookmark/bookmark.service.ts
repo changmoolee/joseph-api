@@ -50,7 +50,7 @@ export class BookmarkService {
         .insert()
         .into(Bookmark)
         .values({
-          user: { id: bookmarkDto.user_id },
+          user: { id: user_id },
           post: { id: bookmarkDto.post_id },
         })
         .execute();

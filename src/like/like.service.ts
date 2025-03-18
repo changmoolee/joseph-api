@@ -50,7 +50,7 @@ export class LikeService {
         .insert()
         .into(Like)
         .values({
-          user: { id: likeDto.user_id },
+          user: { id: user_id },
           post: { id: likeDto.post_id },
         })
         .execute();
