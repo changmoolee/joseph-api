@@ -101,8 +101,13 @@ export class AuthService {
     response.cookie('token', token, {
       httpOnly: true, // XSS 공격 방지
       secure: process.env.NODE_ENV === 'production', // HTTPS 환경에서만 쿠키 전송 (배포 환경에서는 true)
-      sameSite: 'none', // CORS 환경에서 쿠키 허용
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', // 배포 환경에서는 None, 로컬에서는 Strict
       maxAge: 2 * 60 * 60 * 1000, // 2시간 후 만료
+      domain:
+        process.env.NODE_ENV === 'production'
+          ? 'joseph-backend.site'
+          : 'localhost:4000',
+      path: '/',
     });
 
     response.json({
