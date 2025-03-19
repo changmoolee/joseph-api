@@ -4,8 +4,8 @@ import {
   Injectable,
   Param,
   NotFoundException,
-  UnauthorizedException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -82,7 +82,7 @@ export class AuthService {
 
     // 불일치시 에러
     if (!isMatch) {
-      throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
+      throw new BadRequestException('비밀번호가 일치하지 않습니다.');
     }
 
     const JWT_SECRET = process.env.JWT_SECRET || '';
@@ -162,7 +162,10 @@ export class AuthService {
     };
   }
 
-  async deleteUser(@Param('id') id: number): Promise<ApiResponseDto<null>> {
+  async deleteUser(
+    @Param('id') id: number,
+    @Res() response: Response,
+  ): Promise<void> {
     const findUser = await this.userRepository.findOne({
       where: {
         id,
@@ -170,9 +173,7 @@ export class AuthService {
     });
 
     if (!findUser) {
-      throw new NotFoundException(
-        `user_id :${id} email : ${findUser.email} 회원이 존재하지 않습니다.`,
-      );
+      throw new NotFoundException(`탈퇴할 회원이 존재하지 않습니다.`);
     }
 
     await this.userRepository
@@ -182,10 +183,12 @@ export class AuthService {
       .andWhere('email = :email', { email: findUser.email })
       .execute();
 
-    return {
+    response.clearCookie('token');
+
+    response.json({
       data: null,
       result: 'success',
       message: `user_id :${id} email : ${findUser.email} 회원의 계정을 탈퇴하였습니다.`,
-    };
+    });
   }
 }
