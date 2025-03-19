@@ -51,7 +51,8 @@ export class AuthController {
   @Delete('user/:id')
   async deleteUser(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<ApiResponseDto<null>> {
-    return this.authService.deleteUser(id);
+    @Res() response: Response,
+  ): Promise<void> {
+    return this.authService.deleteUser(id, response);
   }
 }
