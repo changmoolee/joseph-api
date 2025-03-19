@@ -5,6 +5,7 @@ import {
   Param,
   NotFoundException,
   UnauthorizedException,
+  ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -30,6 +31,15 @@ export class AuthService {
   async signupUser(
     @Body() userDto: CreateUserDto,
   ): Promise<ApiResponseDto<[]>> {
+    /** 이메일 중복 여부 */
+    const isDuplicateEmail = await this.userRepository.findOne({
+      where: { email: userDto.email },
+    });
+
+    if (isDuplicateEmail) {
+      throw new ConflictException('이미 가입된 이메일입니다.');
+    }
+
     // cost 10
     const saltRounds = 10;
 
