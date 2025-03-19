@@ -103,10 +103,6 @@ export class AuthService {
       secure: process.env.NODE_ENV === 'production', // HTTPS 환경에서만 쿠키 전송 (배포 환경에서는 true)
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', // 배포 환경에서는 None, 로컬에서는 Strict
       maxAge: 2 * 60 * 60 * 1000, // 2시간 후 만료
-      domain:
-        process.env.NODE_ENV === 'production'
-          ? 'joseph-instagram.vercel.app'
-          : 'localhost',
     });
 
     response.json({
