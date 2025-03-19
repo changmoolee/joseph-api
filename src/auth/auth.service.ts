@@ -101,7 +101,7 @@ export class AuthService {
     response.cookie('token', token, {
       httpOnly: true, // XSS 공격 방지
       secure: process.env.NODE_ENV === 'production', // HTTPS 환경에서만 쿠키 전송 (배포 환경에서는 true)
-      sameSite: 'strict', // CSRF 공격 방지
+      sameSite: 'none', // CORS 환경에서 쿠키 허용
       maxAge: 2 * 60 * 60 * 1000, // 2시간 후 만료
     });
 
