@@ -1,7 +1,18 @@
 # joseph-api
 
-🚀 **배포 URL:** [https://joseph-instagram.vercel.app/](https://joseph-instagram.vercel.app/)  
-<br><br>
+<br>
+
+🚀 **배포 URL:**
+
+**백엔드 (NestJS) →** [🌐 joseph-backend.site](https://joseph-backend.site)
+
+- GitHub 레포지토리: [📂 joseph-api](https://github.com/changmoolee/joseph-api)
+
+**프론트엔드 (Next.js) →** [🌍 joseph-instagram.vercel.app](https://joseph-instagram.vercel.app/)
+
+- GitHub 레포지토리: [📂 joseph-instagram](https://github.com/changmoolee/joseph-instagram)
+
+<br>
 
 #### \*\* 현재 애플리케이션은 개발중입니다.
 
@@ -40,6 +51,8 @@
 
 <img src="https://img.shields.io/badge/JWT-black?style=flat-square&logo=jsonwebtokens&logoColor=white"/></a>
 <img src="https://img.shields.io/badge/bcrypt-aaaaaa?style=flat-square&logo=security&logoColor=white"/></a>
+
+<br><br>
 
 ## 📌 기능
 
