@@ -98,15 +98,9 @@ export class AuthService {
       .setExpirationTime('2h')
       .sign(new TextEncoder().encode(JWT_SECRET));
 
-    response.cookie('token', token, {
-      httpOnly: true, // XSS 공격 방지
-      secure: process.env.NODE_ENV === 'production', // HTTPS 환경에서만 쿠키 전송 (배포 환경에서는 true)
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', // 배포 환경에서는 None, 로컬에서는 Strict
-      maxAge: 2 * 60 * 60 * 1000, // 2시간 후 만료
-    });
-
     response.json({
       data: {
+        token,
         id: findUser.id,
         email: findUser.email,
         image_url: findUser.image_url,
