@@ -16,6 +16,7 @@ import { CommentModule } from 'src/comment/comment.module';
 import { Comment } from 'src/comment/comment.entity';
 import { FollowModule } from 'src/follow/follow.module';
 import { Follow } from 'src/follow/follow.entity';
+import { GptModule } from 'src/gpt/gpt.module';
 
 // 개발환경 여부
 const isDevelopment = process.env.NODE_ENV === 'development';
@@ -46,6 +47,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
     BookmarkModule,
     CommentModule,
     FollowModule,
+    GptModule,
   ],
   controllers: [AppController],
   providers: [AppService],
