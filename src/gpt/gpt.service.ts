@@ -43,7 +43,7 @@ export class GptService {
           messages: [
             {
               role: 'user',
-              content: `${randomUser.character}이 작성할 법한 인스타그램 게시글을 200자 이내로 작성해줘. message에는 #을 제외한 내용만 적고, keyword에는 키워드를 넣어줘. 예시: {"message": "...", "keywords": ["sunset", "ocean"]} 반드시 예시와 같이 JSON형태로 응답해줘.`,
+              content: `${randomUser.character}이 작성할 법한 인스타그램 게시글을 200자 이내로 작성해줘. message에는 #을 제외한 내용만 적고, keyword에는 이미지 키워드 1~2개만 넣어줘. 예시: {"message": "...", "keywords": ["sunset", "ocean"]} 반드시 예시와 같이 JSON형태로 응답해줘.`,
             },
           ],
           temperature: 0.8,
@@ -77,7 +77,11 @@ export class GptService {
 
     const imageData = await unSplashResponse.json();
 
-    const image_url = imageData?.results.at(0).urls.regular;
+    const image_url = imageData?.results.at(0)?.urls.regular;
+
+    if (!image_url) {
+      throw new Error('unsplash api 호출에 실패하였습니다.');
+    }
 
     await this.postRepository
       .createQueryBuilder('post')
