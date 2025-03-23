@@ -8,6 +8,9 @@ export class AutoPostCron {
 
   @Cron('0 3 * * *') // 매일 오전 12시 (UTC 3시 → KST 오전 12시)
   async handleCron() {
-    await this.gptService.generatePost();
+    /** 관리자 전용 키 */
+    const adminKey = process.env.GENERATE_POST_API_KEY;
+
+    await this.gptService.generatePost(adminKey);
   }
 }

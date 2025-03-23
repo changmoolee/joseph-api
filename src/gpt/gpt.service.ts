@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Post } from 'src/post/post.entity';
@@ -12,7 +12,11 @@ export class GptService {
     private postRepository: Repository<Post>,
   ) {}
 
-  async generatePost(): Promise<string> {
+  async generatePost(adminKey: string): Promise<string> {
+    if (adminKey !== process.env.GENERATE_POST_API_KEY) {
+      throw new UnauthorizedException('접근 권한이 없습니다.');
+    }
+
     const users = [
       {
         id: 1,
