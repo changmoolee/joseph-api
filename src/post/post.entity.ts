@@ -26,7 +26,7 @@ export class Post {
   @Column({ type: 'text' })
   description: string;
 
-  @Column({ length: 255 })
+  @Column({ type: 'varchar', length: 1024 })
   image_url: string;
 
   // 여러 개의 post가 하나의 user를 참조 (다 대 일 관계)

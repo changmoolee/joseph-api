@@ -16,6 +16,9 @@ import { CommentModule } from 'src/comment/comment.module';
 import { Comment } from 'src/comment/comment.entity';
 import { FollowModule } from 'src/follow/follow.module';
 import { Follow } from 'src/follow/follow.entity';
+import { GptModule } from 'src/gpt/gpt.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { CronModule } from 'src/cron/cron.module';
 
 // 개발환경 여부
 const isDevelopment = process.env.NODE_ENV === 'development';
@@ -38,6 +41,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
       database: process.env.DATABASE_NAME,
       entities: [User, Post, Like, Bookmark, Comment, Follow], // 엔티티 추가 필수
     }),
+    ScheduleModule.forRoot(), // 스케줄 모듈 추가
     // 모듈 추가 필수
     UserModule,
     PostModule,
@@ -46,6 +50,8 @@ const isDevelopment = process.env.NODE_ENV === 'development';
     BookmarkModule,
     CommentModule,
     FollowModule,
+    GptModule,
+    CronModule,
   ],
   controllers: [AppController],
   providers: [AppService],
