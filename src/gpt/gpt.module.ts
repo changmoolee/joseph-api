@@ -8,5 +8,6 @@ import { Post } from 'src/post/post.entity';
   imports: [TypeOrmModule.forFeature([Post, User])],
   providers: [GptService],
   controllers: [GptController],
+  exports: [GptService],
 })
 export class GptModule {}
