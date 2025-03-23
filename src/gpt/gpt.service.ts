@@ -79,11 +79,6 @@ export class GptService {
 
     const image_url = imageData?.results.at(0).urls.regular;
 
-    console.log('imageData', imageData);
-
-    console.log('message', message);
-    console.log('image_url', image_url);
-
     await this.postRepository
       .createQueryBuilder('post')
       .insert()
