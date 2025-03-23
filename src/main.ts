@@ -3,6 +3,12 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import { GlobalExceptionFilter } from 'src/common/filters/global-exception.filter';
+import * as crypto from 'crypto';
+
+if (!globalThis.crypto) {
+  //@ts-expect-error: globalThis.crypto is not typed in Node.js by default
+  globalThis.crypto = crypto;
+}
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
