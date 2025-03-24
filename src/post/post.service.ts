@@ -35,8 +35,11 @@ export class PostService {
     private bookmarkRepository: Repository<Bookmark>,
   ) {}
 
-  async getAllPosts(): Promise<ApiResponseDto<Post[]>> {
-    const posts = await this.postRepository
+  async getAllPosts(
+    @Query('take') take: number,
+    @Query('cursor') cursor: string,
+  ): Promise<Post[]> {
+    const postsQueryBuilder = this.postRepository
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.user', 'user')
       .leftJoinAndSelect('post.likes', 'likes')
@@ -65,13 +68,23 @@ export class PostService {
         'bookmarkUser.deleted_at',
       ])
       .where('user.deleted_at IS NULL') // 탈퇴회원 필터링
-      .getMany();
+      .orderBy('post.created_at', 'DESC') // 최신순
+      .limit(take);
 
-    return {
-      data: posts,
-      result: 'success',
-      message: '게시글을 성공적으로 가져왔습니다.',
-    };
+    // 커서가 있을 경우 필터 적용
+    if (cursor) {
+      postsQueryBuilder.andWhere('post.created_at < :cursor', {
+        cursor: new Date(cursor),
+      });
+    }
+
+    const posts = await postsQueryBuilder.getMany();
+
+    /**
+     * 무한스크롤 전용 API이므로, ApiResponseDto 인터페이스를 따라 리턴하지 않는다. (25.03.24)
+     * 오로지 배열 데이터만 응답한다.
+     */
+    return posts;
   }
 
   async getPost(@Param('id') id: number): Promise<ApiResponseDto<Post>> {
@@ -105,6 +118,7 @@ export class PostService {
         'bookmarkUser.username',
         'bookmarkUser.deleted_at',
       ])
+      .orderBy('post.created_at', 'DESC')
       .getOne();
 
     if (!post) {

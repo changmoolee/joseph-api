@@ -21,8 +21,11 @@ export class PostController {
   constructor(private readonly postService: PostService) {}
 
   @Get()
-  async getAllPosts(): Promise<ApiResponseDto<PostEntity[]>> {
-    return this.postService.getAllPosts();
+  async getAllPosts(
+    @Query('take', ParseIntPipe) take: number,
+    @Query('cursor') cursor: string,
+  ): Promise<PostEntity[]> {
+    return this.postService.getAllPosts(take, cursor);
   }
 
   @Get(':id')
