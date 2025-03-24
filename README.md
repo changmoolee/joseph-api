@@ -52,26 +52,40 @@
 <img src="https://img.shields.io/badge/JWT-black?style=flat-square&logo=jsonwebtokens&logoColor=white"/></a>
 <img src="https://img.shields.io/badge/bcrypt-aaaaaa?style=flat-square&logo=security&logoColor=white"/></a>
 
+### 📌 **AI / 외부 API 연동**
+
+<div>
+<img src="https://img.shields.io/badge/OpenAI-412991?style=flat-square&logo=openai&logoColor=white"/>
+<img src="https://img.shields.io/badge/Unsplash-000000?style=flat-square&logo=Unsplash&logoColor=white"/>
+</div>
+
 <br><br>
 
 ## 📌 기능
 
 ### 주요 기능
 
-1. **사용자 인증**<br>
+1. **사용자 인증** <br>
    - 회원가입, 로그인 (JWT 기반 인증)<br>
    - 비밀번호 암호화 (bcrypt)<br>
    - 사용자 정보 조회 및 수정<br><br>
-2. **게시글 관리**<br>
+2. **게시글 관리** <br>
    - 게시글 생성, 수정, 삭제<br>
    - 게시글 목록 조회 (전체 / 특정 사용자)<br>
    - 이미지 업로드<br><br>
-3. **좋아요 기능**<br>
+3. **좋아요 기능** <br>
    - 게시물 좋아요 / 좋아요 취소<br>
    - 좋아요한 게시물 목록 조회<br><br>
-4. **팔로우 기능**<br>
+4. **팔로우 기능** <br>
    - 특정 사용자를 팔로우 / 언팔로우<br>
    - 팔로잉 / 팔로워 목록 조회<br><br>
+5. **게시물 자동 생성 기능 (GPT + CRON)** <br>  
+   - OpenAI GPT API를 사용하여 감성적인 게시물 문장을 자동 생성  
+   - GPT가 반환한 키워드로 Unsplash에서 이미지 검색 후 자동 업로드  
+   - NestJS의 `@Schedule` 모듈과 `@Cron` 데코레이터를 이용해 **하루에 1회 게시물 자동 생성**  
+   - 보안 강화를 위해 해당 API는 서버 내부용 또는 관리자용 비밀 키로 보호
+   
+
 
 <br><br>
 
@@ -87,3 +101,5 @@
 ┣ 📂 post - 게시물 관리<br>
 ┣ 📂 user - 사용자 정보 관리<br>
 ┣ 📂 middleware - 미들웨어 <br>
+┣ 📂 gpt - GPT API 연동 및 게시물 자동 생성 <br>
+┣ 📂 cron - CRON 스케줄링 작업 (자동 게시물 등록) <br>
