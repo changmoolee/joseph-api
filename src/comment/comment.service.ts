@@ -39,6 +39,7 @@ export class CommentService {
         'user.deleted_at',
       ])
       .where('comment.post_id = :post_id', { post_id })
+      .orderBy('comment.created_at', 'DESC') // 최신순
       .getMany();
 
     if (!findComments) {

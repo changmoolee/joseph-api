@@ -30,6 +30,14 @@ export class GptService {
         id: 4,
         character: '여행을 좋아하는 30 40대 남성',
       },
+      {
+        id: 13,
+        character: '어린이 애니메이션에 등장하는 애교 많은 여자 동물 캐릭터',
+      },
+      {
+        id: 14,
+        character: 'TV에 자주 출연하는 친절하고 유명한 강아지 훈련사',
+      },
     ];
     const randomIndex = Math.floor(Math.random() * users.length);
     const randomUser = users.at(randomIndex);
@@ -47,7 +55,7 @@ export class GptService {
           messages: [
             {
               role: 'user',
-              content: `${randomUser.character}이 작성할 법한 인스타그램 게시글을 200자 이내로 작성해줘. message에는 #을 제외한 내용만 적고, keyword에는 이미지 키워드 1~2개만 넣어줘. 예시: {"message": "...", "keywords": ["sunset", "ocean"]} 반드시 예시와 같이 JSON형태로 응답해줘.`,
+              content: `${randomUser.character}이(가) 작성할 법한 인스타그램 게시글을 200자 이내로 작성해줘. message에는 #을 제외한 내용만 적고, keyword에는 이미지 키워드 1~2개만 넣어줘. 예시: {"message": "...", "keywords": ["sunset", "ocean"]} 반드시 예시와 같이 JSON형태로 응답해줘.`,
             },
           ],
           temperature: 0.8,
