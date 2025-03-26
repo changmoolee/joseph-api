@@ -15,6 +15,7 @@ import { ApiResponseDto } from 'src/common/dto/response.dto';
 import { Post as PostEntity } from 'src/post/post.entity';
 import { MakePostDto } from 'src/post/dto/make-post.dto';
 import { UpdatePostDto } from 'src/post/dto/update-post.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('post')
 export class PostController {
@@ -43,6 +44,7 @@ export class PostController {
     return this.postService.getUserPosts(user_id, type);
   }
 
+  @ApiBearerAuth()
   @Post()
   async makePost(
     @Req() req: Request,
@@ -51,6 +53,7 @@ export class PostController {
     return this.postService.makePost(req, postDto);
   }
 
+  @ApiBearerAuth()
   @Put(':id')
   async updatePost(
     @Req() req: Request,
@@ -60,6 +63,7 @@ export class PostController {
     return this.postService.updatePost(req, id, postDto);
   }
 
+  @ApiBearerAuth()
   @Delete(':id')
   async deletePost(
     @Req() req: Request,

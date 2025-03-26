@@ -12,6 +12,7 @@ import { CommentService } from './comment.service';
 import { ApiResponseDto } from 'src/common/dto/response.dto';
 import { MakeCommentDto } from 'src/comment/dto/make-comment.dto';
 import { Comment } from 'src/comment/comment.entity';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('comment')
 export class CommentController {
@@ -24,6 +25,7 @@ export class CommentController {
     return this.commentService.getComments(post_id);
   }
 
+  @ApiBearerAuth()
   @Post('post/:id')
   async makeComment(
     @Param('id', ParseIntPipe) id: number,
@@ -33,6 +35,7 @@ export class CommentController {
     return this.commentService.makeComment(id, commentDto, req);
   }
 
+  @ApiBearerAuth()
   @Delete('post/:id')
   async deleteComment(
     @Param('id', ParseIntPipe) id: number,

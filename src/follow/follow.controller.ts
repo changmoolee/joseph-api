@@ -10,11 +10,13 @@ import {
 import { FollowService } from './follow.service';
 import { ApiResponseDto } from 'src/common/dto/response.dto';
 import { ExcuteFollowDto } from 'src/follow/dto/excute-follow.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('follow')
 export class FollowController {
   constructor(private readonly likeService: FollowService) {}
 
+  @ApiBearerAuth()
   @Post('user')
   async excuteFollow(
     @Body() followDto: ExcuteFollowDto,

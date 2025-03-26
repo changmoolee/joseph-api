@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import { GlobalExceptionFilter } from 'src/common/filters/global-exception.filter';
 import * as crypto from 'crypto';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 if (!globalThis.crypto) {
   //@ts-expect-error: globalThis.crypto is not typed in Node.js by default
@@ -31,6 +32,17 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   app.useGlobalFilters(new GlobalExceptionFilter());
+
+  /** swagger 도입 */
+  const config = new DocumentBuilder()
+    .setTitle('joseph-api')
+    .setDescription('joseph-instagram 에 백엔드 기능을 제공합니다.')
+    .addBearerAuth()
+    .setVersion('1.0')
+    .build();
+
+  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, documentFactory);
 
   await app.listen(process.env.PORT ?? 4000);
 }
