@@ -37,6 +37,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('joseph-api')
     .setDescription('joseph-instagram 에 백엔드 기능을 제공합니다.')
+    .addBearerAuth()
     .setVersion('1.0')
     .build();
 

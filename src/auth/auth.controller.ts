@@ -15,6 +15,7 @@ import { SigninUserDto } from 'src/auth/dto/signin-user.dto';
 import { Response } from 'express';
 import { UpdateUserDto } from 'src/auth/dto/update-user.dto';
 import { User } from 'src/user/user.entity';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -40,6 +41,7 @@ export class AuthController {
     return this.authService.signoutUser(response);
   }
 
+  @ApiBearerAuth()
   @Put('user/:id')
   async updateUser(
     @Param('id', ParseIntPipe) id: number,
@@ -48,6 +50,7 @@ export class AuthController {
     return this.authService.updateUser(id, usertDto);
   }
 
+  @ApiBearerAuth()
   @Delete('user/:id')
   async deleteUser(
     @Param('id', ParseIntPipe) id: number,
