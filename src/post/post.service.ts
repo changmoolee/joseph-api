@@ -164,6 +164,7 @@ export class PostService {
           'postUser.deleted_at',
         ])
         .where('like.user_id = :user_id', { user_id })
+        .orderBy('post.created_at', 'DESC')
         .getMany();
 
       /** 탈퇴회원 필터링 */
@@ -187,6 +188,7 @@ export class PostService {
           'postUser.deleted_at',
         ])
         .where('bookmark.user_id = :user_id', { user_id })
+        .orderBy('post.created_at', 'DESC')
         .getMany();
 
       /** 탈퇴회원 필터링 */
@@ -207,6 +209,7 @@ export class PostService {
         ])
         .where('post.user_id = :user_id', { user_id })
         .andWhere('user.deleted_at IS NULL')
+        .orderBy('post.created_at', 'DESC')
         .getMany();
     }
 

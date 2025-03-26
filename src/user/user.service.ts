@@ -71,6 +71,7 @@ export class UserService {
           'followings.id',
         ])
         .take(10)
+        .orderBy('user.username', 'ASC')
         .getMany();
 
       return {
