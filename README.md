@@ -7,6 +7,7 @@
 **백엔드 (NestJS) →** [🌐 joseph-backend.site](https://joseph-backend.site)
 
 - GitHub 레포지토리: [📂 joseph-api](https://github.com/changmoolee/joseph-api)
+- Swagger Api 문서: [☘️ swagger](https://joseph-backend.site/api)
 
 **프론트엔드 (Next.js) →** [🌍 joseph-instagram.vercel.app](https://joseph-instagram.vercel.app/)
 
@@ -83,8 +84,8 @@
    - OpenAI GPT API를 사용하여 감성적인 게시물 문장을 자동 생성  
    - GPT가 반환한 키워드로 Unsplash에서 이미지 검색 후 자동 업로드  
    - NestJS의 `@Schedule` 모듈과 `@Cron` 데코레이터를 이용해 **하루에 1회 게시물 자동 생성**  
-   - 보안 강화를 위해 해당 API는 서버 내부용 또는 관리자용 비밀 키로 보호
-   
+   - 보안 강화를 위해 해당 API는 서버 내부용 또는 관리자용 비밀 키로 보호<br><br>
+
 
 
 <br><br>
@@ -103,3 +104,13 @@
 ┣ 📂 middleware - 미들웨어 <br>
 ┣ 📂 gpt - GPT API 연동 및 게시물 자동 생성 <br>
 ┣ 📂 cron - CRON 스케줄링 작업 (자동 게시물 등록) <br>
+
+<br><br>
+
+### 📘 Swagger API 문서 제공
+
+NestJS의 `@nestjs/swagger` 모듈을 활용하여, 전체 API를 문서화하고 테스트할 수 있도록 Swagger UI를 제공하고 있습니다.
+
+- 🔐 인증이 필요한 API는 Authorize 버튼을 통해 JWT 토큰을 입력하여 테스트할 수 있습니다.
+- 🚀 문서 링크: [https://joseph-backend.site/api](https://joseph-backend.site/api)
+
