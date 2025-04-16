@@ -16,6 +16,7 @@ import { Response } from 'express';
 import { UpdateUserDto } from 'src/auth/dto/update-user.dto';
 import { User } from 'src/user/user.entity';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { SigninGoogleDto } from 'src/auth/dto/signin-google.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -57,5 +58,13 @@ export class AuthController {
     @Res() response: Response,
   ): Promise<void> {
     return this.authService.deleteUser(id, response);
+  }
+
+  @Post('google')
+  async signinGoogle(
+    @Body() googleDto: SigninGoogleDto,
+    @Res() response: Response,
+  ): Promise<void> {
+    return this.authService.signinGoogle(googleDto, response);
   }
 }
