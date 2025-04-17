@@ -17,6 +17,10 @@ import { CreateUserDto } from 'src/auth/dto/create-user.dto';
 import { SigninUserDto } from 'src/auth/dto/signin-user.dto';
 import { Response } from 'express';
 import { UpdateUserDto } from 'src/auth/dto/update-user.dto';
+import { SigninGoogleDto } from 'src/auth/dto/signin-google.dto';
+
+// 개발환경 여부
+const isDevelopment = process.env.NODE_ENV === 'development';
 
 @Injectable()
 export class AuthService {
@@ -188,5 +192,115 @@ export class AuthService {
       result: 'success',
       message: `user_id :${id} email : ${findUser.email} 회원의 계정을 탈퇴하였습니다.`,
     });
+  }
+
+  async signinGoogle(
+    @Body() googleDto: SigninGoogleDto,
+    @Res() response: Response,
+  ): Promise<void> {
+    // 구글 - 클라이언트로부터 받은 code
+    const { code } = googleDto;
+
+    try {
+      // access_token 받기 위한 요청
+      const googleResponse = await fetch(
+        'https://oauth2.googleapis.com/token',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            code,
+            client_id: isDevelopment
+              ? process.env.LOCAL_CLIENT_ID
+              : process.env.CLIENT_ID,
+            client_secret: isDevelopment
+              ? process.env.LOCAL_CLIENT_SECRET
+              : process.env.CLIENT_SECRET,
+            grant_type: 'authorization_code',
+            redirect_uri: isDevelopment
+              ? process.env.LOCAL_REDIRECT_URL
+              : process.env.REDIRECT_URL,
+          }),
+        },
+      );
+
+      const jsonResponse = await googleResponse.json();
+
+      const access_token = jsonResponse.access_token;
+
+      // 구글로부터 사용자 정보 받기 위한 요청
+      const userinfoResponse = await fetch(
+        `https://www.googleapis.com/oauth2/v2/userinfo`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: ` Bearer ${access_token}`,
+          },
+        },
+      );
+
+      const {
+        id: provider_id,
+        email,
+        name: username,
+        picture: image_url,
+      } = await userinfoResponse.json();
+
+      let id;
+
+      const findUser = await this.userRepository.findOne({
+        where: { provider_id },
+      });
+
+      if (!findUser) {
+        const result = await this.userRepository
+          .createQueryBuilder('user')
+          .insert()
+          .into(User)
+          .values({
+            email,
+            username,
+            image_url,
+            provider: 'google',
+            provider_id,
+          })
+          .execute();
+
+        id = result.raw.insertId;
+      } else {
+        id = findUser.id;
+      }
+
+      const JWT_SECRET = process.env.JWT_SECRET || '';
+
+      const alg = 'HS256';
+
+      // JWT token
+      const token = await new jose.SignJWT({
+        id,
+        email,
+      })
+        .setProtectedHeader({ alg })
+        .setIssuedAt()
+        .setExpirationTime('2h')
+        .sign(new TextEncoder().encode(JWT_SECRET));
+
+      response.json({
+        data: {
+          token, // token 값을 전달 (25.03.21 iOS Safari 이슈로 쿠키 방식에서 수정)
+          id,
+          email,
+          image_url,
+          username,
+        },
+        result: 'success',
+        message: '로그인을 성공하였습니다.',
+      });
+    } catch (error) {
+      console.log('error', error);
+      throw new Error('구글 로그인을 실패하였습니다.' + error);
+    }
   }
 }

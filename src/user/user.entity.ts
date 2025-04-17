@@ -31,6 +31,12 @@ export class User {
   @Column({ nullable: true })
   image_url: string;
 
+  @Column({ nullable: true })
+  provider: string;
+
+  @Column({ nullable: true })
+  provider_id: string;
+
   // created_at 필드는 유저 생성 시 자동으로 현재 날짜/시간이 저장됨 (DEFAULT CURRENT_TIMESTAMP)
   @CreateDateColumn()
   created_at: Date;
