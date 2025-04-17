@@ -263,6 +263,7 @@ export class AuthService {
             email,
             username,
             image_url,
+            provider: 'google',
             provider_id,
           })
           .execute();
