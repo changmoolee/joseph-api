@@ -39,19 +39,20 @@
 
 ### 📌 **인프라 & 배포**
 
-<img src="https://img.shields.io/badge/AWS EC2-FF9900?style=flat-square&logo=Amazon EC2&logoColor=white"/></a>
-<img src="https://img.shields.io/badge/AWS S3-569A31?style=flat-square&logo=Amazon S3&logoColor=white"/></a>
+<img src="https://img.shields.io/badge/AWS-EC2-FF9900?style=flat-square&logo=Amazon-EC2&logoColor=white"/></a>
+<img src="https://img.shields.io/badge/AWS-S3-569A31?style=flat-square&logo=Amazon-S3&logoColor=white"/></a>
 
 ### 📌 **데이터베이스 & ORM**
 
 <img src="https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=MySQL&logoColor=white"/></a>
 <img src="https://img.shields.io/badge/TypeORM-FF5733?style=flat-square&logo=typeorm&logoColor=white"/></a>
-<img src="https://img.shields.io/badge/AWS S3-569A31?style=flat-square&logo=Amazon S3&logoColor=white"/></a>
+<img src="https://img.shields.io/badge/AWS-S3-569A31?style=flat-square&logo=Amazon-S3&logoColor=white"/></a>
 
 ### 📌 **보안 & 인증**
 
 <img src="https://img.shields.io/badge/JWT-black?style=flat-square&logo=jsonwebtokens&logoColor=white"/></a>
 <img src="https://img.shields.io/badge/bcrypt-aaaaaa?style=flat-square&logo=security&logoColor=white"/></a>
+<img src="https://img.shields.io/badge/Google OAuth2.0-4285F4?style=flat-square&logo=google&logoColor=white"/></a>
 
 ### 📌 **AI / 외부 API 연동**
 
@@ -68,6 +69,7 @@
 
 1. **사용자 인증** <br>
    - 회원가입, 로그인 (JWT 기반 인증)<br>
+   - ✅ Google OAuth 로그인 연동 (code → access_token → 사용자 정보 → JWT 발급)
    - 비밀번호 암호화 (bcrypt)<br>
    - 사용자 정보 조회 및 수정<br><br>
 2. **게시글 관리** <br>
@@ -80,7 +82,7 @@
 4. **팔로우 기능** <br>
    - 특정 사용자를 팔로우 / 언팔로우<br>
    - 팔로잉 / 팔로워 목록 조회<br><br>
-5. **게시물 자동 생성 기능 (GPT + CRON)** <br>  
+5. **✅ 게시물 자동 생성 기능 (GPT + CRON)** <br>  
    - OpenAI GPT API를 사용하여 감성적인 게시물 문장을 자동 생성  
    - GPT가 반환한 키워드로 Unsplash에서 이미지 검색 후 자동 업로드  
    - NestJS의 `@Schedule` 모듈과 `@Cron` 데코레이터를 이용해 **하루에 1회 게시물 자동 생성**  
@@ -93,7 +95,7 @@
 ## 📂 프로젝트 구조
 
 📦 src<br>
-┣ 📂 auth - 인증 관련 (JWT, 로그인, 회원가입)<br>
+┣ 📂 auth - 인증 관련 (JWT, 회원가입, 로그인, Google OAuth 처리)<br>
 ┣ 📂 common - 공통 유틸 및 DTO<br>
 ┣ 📂 like - 좋아요 기능<br>
 ┣ 📂 bookmark - 북마크 기능<br>
