@@ -117,11 +117,12 @@ export class AuthService {
   }
 
   async signoutUser(response: Response) {
-    response.clearCookie('token', {
-      httpOnly: true, // XSS 공격 방지
-      secure: process.env.NODE_ENV === 'production', // HTTPS 환경에서만 쿠키 전송 (배포 환경에서는 true)
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', // 배포 환경에서는 None, 로컬에서는 Strict
-    });
+    /** 현재 쿠키 로그인 방식을 사용하지 않으므로 주석 처리 */
+    // response.clearCookie('token', {
+    //   httpOnly: true, // XSS 공격 방지
+    //   secure: process.env.NODE_ENV === 'production', // HTTPS 환경에서만 쿠키 전송 (배포 환경에서는 true)
+    //   sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', // 배포 환경에서는 None, 로컬에서는 Strict
+    // });
 
     response.json({
       data: null,
