@@ -18,6 +18,7 @@ import { SigninUserDto } from 'src/auth/dto/signin-user.dto';
 import { Response } from 'express';
 import { UpdateUserDto } from 'src/auth/dto/update-user.dto';
 import { SigninGoogleDto } from 'src/auth/dto/signin-google.dto';
+import { SigninKakaoDto, KakaoUserDto } from 'src/auth/dto/signin-kakao.dto';
 
 // 개발환경 여부
 const isDevelopment = process.env.NODE_ENV === 'development';
@@ -116,11 +117,12 @@ export class AuthService {
   }
 
   async signoutUser(response: Response) {
-    response.clearCookie('token', {
-      httpOnly: true, // XSS 공격 방지
-      secure: process.env.NODE_ENV === 'production', // HTTPS 환경에서만 쿠키 전송 (배포 환경에서는 true)
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', // 배포 환경에서는 None, 로컬에서는 Strict
-    });
+    /** 현재 쿠키 로그인 방식을 사용하지 않으므로 주석 처리 */
+    // response.clearCookie('token', {
+    //   httpOnly: true, // XSS 공격 방지
+    //   secure: process.env.NODE_ENV === 'production', // HTTPS 환경에서만 쿠키 전송 (배포 환경에서는 true)
+    //   sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', // 배포 환경에서는 None, 로컬에서는 Strict
+    // });
 
     response.json({
       data: null,
@@ -302,5 +304,163 @@ export class AuthService {
       console.log('error', error);
       throw new Error('구글 로그인을 실패하였습니다.' + error);
     }
+  }
+
+  async signinKakao(
+    @Body() kakaoDto: SigninKakaoDto,
+    @Res() response: Response,
+  ): Promise<void> {
+    // 카카오 - 클라이언트로부터 받은 code
+    const { code } = kakaoDto;
+
+    try {
+      // access_token 받기 위한 요청
+      const kakaoResponse = await fetch('https://kauth.kakao.com/oauth/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+        },
+        body: new URLSearchParams({
+          code,
+          client_id: isDevelopment
+            ? process.env.LOCAL_KAKAO_CLIENT_ID
+            : process.env.KAKAO_CLIENT_ID,
+          client_secret: isDevelopment
+            ? process.env.LOCAL_KAKAO_CLIENT_SECRET
+            : process.env.KAKAO_CLIENT_SECRET,
+          grant_type: 'authorization_code',
+          redirect_uri: isDevelopment
+            ? process.env.LOCAL_KAKAO_REDIRECT_URL
+            : process.env.KAKAO_REDIRECT_URL,
+        }),
+      });
+
+      const jsonResponse = await kakaoResponse.json();
+
+      const access_token = jsonResponse.access_token;
+
+      // 카카오로부터 사용자 정보 받기 위한 요청
+      const userinfoResponse = await fetch(
+        `https://kapi.kakao.com/v2/user/me`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: ` Bearer ${access_token}`,
+            'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+          },
+        },
+      );
+
+      const {
+        id: provider_id,
+        properties: { nickname, profile_image },
+      } = await userinfoResponse.json();
+
+      const findUser = await this.userRepository.findOne({
+        where: { provider_id },
+      });
+
+      // 회원 존재 (기가입 회원일 경우)
+      if (findUser) {
+        const JWT_SECRET = process.env.JWT_SECRET || '';
+
+        const alg = 'HS256';
+
+        // JWT token
+        const token = await new jose.SignJWT({
+          id: findUser.id,
+          email: findUser.email,
+        })
+          .setProtectedHeader({ alg })
+          .setIssuedAt()
+          .setExpirationTime('2h')
+          .sign(new TextEncoder().encode(JWT_SECRET));
+
+        // 바로 토큰 전송
+        response.json({
+          data: {
+            token, // token 값을 전달 (25.03.21 iOS Safari 이슈로 쿠키 방식에서 수정)
+            id: findUser.id,
+            email: findUser.email,
+            image_url: findUser.image_url,
+            username: findUser.username,
+          },
+          result: 'success',
+          message: '카카오 로그인을 성공하였습니다.',
+        });
+      } else {
+        // 클라이언트에 회원가입에 필요한 카카오 id 및 회원정보 전달
+        response.json({
+          data: {
+            provider_id,
+            image_url: profile_image,
+            username: nickname,
+          },
+          result: 'success',
+          message: '회원가입 완료를 위해 이메일 입력을 진행합니다.',
+        });
+      }
+    } catch (error) {
+      console.log('error', error);
+      throw new Error('카카오 로그인을 실패하였습니다.' + error);
+    }
+  }
+
+  async completeKakaoSignup(
+    @Body() userDto: KakaoUserDto,
+    @Res() response: Response,
+  ) {
+    const { provider_id, email, image_url, username } = userDto;
+
+    /** 이메일 중복 여부 */
+    const isDuplicateEmail = await this.userRepository.findOne({
+      where: { email: userDto.email },
+    });
+
+    if (isDuplicateEmail) {
+      throw new ConflictException('이미 가입된 이메일입니다.');
+    }
+
+    // https://typeorm.io/insert-query-builder
+    const result = await this.userRepository
+      .createQueryBuilder('user')
+      .insert()
+      .into(User)
+      .values({
+        email,
+        image_url,
+        username,
+        provider_id,
+        provider: 'kakao',
+      })
+      .execute();
+
+    const id = result.raw.insertId;
+
+    const JWT_SECRET = process.env.JWT_SECRET || '';
+
+    const alg = 'HS256';
+
+    // JWT token
+    const token = await new jose.SignJWT({
+      id,
+      email,
+    })
+      .setProtectedHeader({ alg })
+      .setIssuedAt()
+      .setExpirationTime('2h')
+      .sign(new TextEncoder().encode(JWT_SECRET));
+
+    response.json({
+      data: {
+        token, // token 값을 전달 (25.03.21 iOS Safari 이슈로 쿠키 방식에서 수정)
+        id,
+        email,
+        image_url,
+        username,
+      },
+      result: 'success',
+      message: '카카오 로그인을 성공하였습니다.',
+    });
   }
 }

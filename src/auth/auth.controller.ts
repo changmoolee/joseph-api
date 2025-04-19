@@ -17,6 +17,7 @@ import { UpdateUserDto } from 'src/auth/dto/update-user.dto';
 import { User } from 'src/user/user.entity';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { SigninGoogleDto } from 'src/auth/dto/signin-google.dto';
+import { SigninKakaoDto, KakaoUserDto } from 'src/auth/dto/signin-kakao.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -66,5 +67,21 @@ export class AuthController {
     @Res() response: Response,
   ): Promise<void> {
     return this.authService.signinGoogle(googleDto, response);
+  }
+
+  @Post('kakao')
+  async signinKakao(
+    @Body() kakaoDto: SigninKakaoDto,
+    @Res() response: Response,
+  ): Promise<void> {
+    return this.authService.signinKakao(kakaoDto, response);
+  }
+
+  @Post('kakao/signup')
+  async completeKakaoSignup(
+    @Body() userDto: KakaoUserDto,
+    @Res() response: Response,
+  ): Promise<void> {
+    return this.authService.completeKakaoSignup(userDto, response);
   }
 }
