@@ -430,6 +430,7 @@ export class AuthService {
         image_url,
         username,
         provider_id,
+        provider: 'kakao',
       })
       .execute();
 
