@@ -18,6 +18,7 @@ import { User } from 'src/user/user.entity';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { SigninGoogleDto } from 'src/auth/dto/signin-google.dto';
 import { SigninKakaoDto, KakaoUserDto } from 'src/auth/dto/signin-kakao.dto';
+import { SigninNaverDto } from 'src/auth/dto/signin-naver.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -83,5 +84,13 @@ export class AuthController {
     @Res() response: Response,
   ): Promise<void> {
     return this.authService.completeKakaoSignup(userDto, response);
+  }
+
+  @Post('naver')
+  async signinNaver(
+    @Body() naverDto: SigninNaverDto,
+    @Res() response: Response,
+  ): Promise<void> {
+    return this.authService.signinNaver(naverDto, response);
   }
 }
