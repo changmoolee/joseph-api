@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
 
 export class SigninKakaoDto {
   @IsNotEmpty()
@@ -15,7 +15,7 @@ export class KakaoUserDto {
   @IsString()
   email: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   image_url: string;
 
