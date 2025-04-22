@@ -19,6 +19,7 @@ import { Response } from 'express';
 import { UpdateUserDto } from 'src/auth/dto/update-user.dto';
 import { SigninGoogleDto } from 'src/auth/dto/signin-google.dto';
 import { SigninKakaoDto, KakaoUserDto } from 'src/auth/dto/signin-kakao.dto';
+import { SigninNaverDto } from 'src/auth/dto/signin-naver.dto';
 
 // 개발환경 여부
 const isDevelopment = process.env.NODE_ENV === 'development';
@@ -462,5 +463,123 @@ export class AuthService {
       result: 'success',
       message: '카카오 로그인을 성공하였습니다.',
     });
+  }
+
+  async signinNaver(
+    @Body() naverDto: SigninNaverDto,
+    @Res() response: Response,
+  ): Promise<void> {
+    // 네이버 - 클라이언트로부터 받은 code 및 state 문자열
+    const { code, state } = naverDto;
+
+    try {
+      // access_token 받기 위한 요청
+      const naverResponse = await fetch(
+        'https://nid.naver.com/oauth2.0/token',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            code,
+            client_id: isDevelopment
+              ? process.env.LOCAL_NAVER_CLIENT_ID
+              : process.env.NAVER_CLIENT_ID,
+            client_secret: isDevelopment
+              ? process.env.LOCAL_NAVER_CLIENT_SECRET
+              : process.env.NAVER_CLIENT_SECRET,
+            grant_type: 'authorization_code',
+            state,
+          }),
+        },
+      );
+
+      const jsonResponse = await naverResponse.json();
+
+      const access_token = jsonResponse.access_token;
+
+      // 네이버로부터 사용자 정보 받기 위한 요청
+      const userinfoResponse = await fetch(
+        `https://openapi.naver.com/v1/nid/me`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: ` Bearer ${access_token}`,
+          },
+        },
+      );
+
+      const {
+        // message,
+        response: userinfo,
+      } = await userinfoResponse.json();
+
+      const {
+        id: provider_id,
+        email,
+        nickname,
+        name,
+        profile_image: image_url,
+      } = userinfo;
+
+      const username = name || nickname;
+
+      let id;
+
+      const findUser = await this.userRepository.findOne({
+        where: { provider_id },
+      });
+
+      if (!findUser) {
+        // TODO: 추후 메일 중복 확인 로직 필요
+
+        const result = await this.userRepository
+          .createQueryBuilder('user')
+          .insert()
+          .into(User)
+          .values({
+            email,
+            username,
+            image_url,
+            provider: 'naver',
+            provider_id,
+          })
+          .execute();
+
+        id = result.raw.insertId;
+      } else {
+        id = findUser.id;
+      }
+
+      const JWT_SECRET = process.env.JWT_SECRET || '';
+
+      const alg = 'HS256';
+
+      // JWT token
+      const token = await new jose.SignJWT({
+        id,
+        email,
+      })
+        .setProtectedHeader({ alg })
+        .setIssuedAt()
+        .setExpirationTime('2h')
+        .sign(new TextEncoder().encode(JWT_SECRET));
+
+      response.json({
+        data: {
+          token, // token 값을 전달 (25.03.21 iOS Safari 이슈로 쿠키 방식에서 수정)
+          id,
+          email,
+          image_url,
+          username,
+        },
+        result: 'success',
+        message: '로그인을 성공하였습니다.',
+      });
+    } catch (error) {
+      console.log('error', error);
+      throw new Error('구글 로그인을 실패하였습니다.' + error);
+    }
   }
 }
