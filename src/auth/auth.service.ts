@@ -204,107 +204,99 @@ export class AuthService {
     // 구글 - 클라이언트로부터 받은 code
     const { code } = googleDto;
 
-    try {
-      // access_token 받기 위한 요청
-      const googleResponse = await fetch(
-        'https://oauth2.googleapis.com/token',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: new URLSearchParams({
-            code,
-            client_id: isDevelopment
-              ? process.env.LOCAL_CLIENT_ID
-              : process.env.CLIENT_ID,
-            client_secret: isDevelopment
-              ? process.env.LOCAL_CLIENT_SECRET
-              : process.env.CLIENT_SECRET,
-            grant_type: 'authorization_code',
-            redirect_uri: isDevelopment
-              ? process.env.LOCAL_REDIRECT_URL
-              : process.env.REDIRECT_URL,
-          }),
+    // access_token 받기 위한 요청
+    const googleResponse = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        code,
+        client_id: isDevelopment
+          ? process.env.LOCAL_CLIENT_ID
+          : process.env.CLIENT_ID,
+        client_secret: isDevelopment
+          ? process.env.LOCAL_CLIENT_SECRET
+          : process.env.CLIENT_SECRET,
+        grant_type: 'authorization_code',
+        redirect_uri: isDevelopment
+          ? process.env.LOCAL_REDIRECT_URL
+          : process.env.REDIRECT_URL,
+      }),
+    });
+
+    const jsonResponse = await googleResponse.json();
+
+    const access_token = jsonResponse.access_token;
+
+    // 구글로부터 사용자 정보 받기 위한 요청
+    const userinfoResponse = await fetch(
+      `https://www.googleapis.com/oauth2/v2/userinfo`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: ` Bearer ${access_token}`,
         },
-      );
+      },
+    );
 
-      const jsonResponse = await googleResponse.json();
+    const {
+      id: provider_id,
+      email,
+      name: username,
+      picture: image_url,
+    } = await userinfoResponse.json();
 
-      const access_token = jsonResponse.access_token;
+    let id;
 
-      // 구글로부터 사용자 정보 받기 위한 요청
-      const userinfoResponse = await fetch(
-        `https://www.googleapis.com/oauth2/v2/userinfo`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: ` Bearer ${access_token}`,
-          },
-        },
-      );
+    const findUser = await this.userRepository.findOne({
+      where: { provider_id },
+    });
 
-      const {
-        id: provider_id,
-        email,
-        name: username,
-        picture: image_url,
-      } = await userinfoResponse.json();
+    if (!findUser) {
+      const result = await this.userRepository
+        .createQueryBuilder('user')
+        .insert()
+        .into(User)
+        .values({
+          email,
+          username,
+          image_url,
+          provider: 'google',
+          provider_id,
+        })
+        .execute();
 
-      let id;
+      id = result.raw.insertId;
+    } else {
+      id = findUser.id;
+    }
 
-      const findUser = await this.userRepository.findOne({
-        where: { provider_id },
-      });
+    const JWT_SECRET = process.env.JWT_SECRET || '';
 
-      if (!findUser) {
-        const result = await this.userRepository
-          .createQueryBuilder('user')
-          .insert()
-          .into(User)
-          .values({
-            email,
-            username,
-            image_url,
-            provider: 'google',
-            provider_id,
-          })
-          .execute();
+    const alg = 'HS256';
 
-        id = result.raw.insertId;
-      } else {
-        id = findUser.id;
-      }
+    // JWT token
+    const token = await new jose.SignJWT({
+      id,
+      email,
+    })
+      .setProtectedHeader({ alg })
+      .setIssuedAt()
+      .setExpirationTime('2h')
+      .sign(new TextEncoder().encode(JWT_SECRET));
 
-      const JWT_SECRET = process.env.JWT_SECRET || '';
-
-      const alg = 'HS256';
-
-      // JWT token
-      const token = await new jose.SignJWT({
+    response.json({
+      data: {
+        token, // token 값을 전달 (25.03.21 iOS Safari 이슈로 쿠키 방식에서 수정)
         id,
         email,
-      })
-        .setProtectedHeader({ alg })
-        .setIssuedAt()
-        .setExpirationTime('2h')
-        .sign(new TextEncoder().encode(JWT_SECRET));
-
-      response.json({
-        data: {
-          token, // token 값을 전달 (25.03.21 iOS Safari 이슈로 쿠키 방식에서 수정)
-          id,
-          email,
-          image_url,
-          username,
-        },
-        result: 'success',
-        message: '로그인을 성공하였습니다.',
-      });
-    } catch (error) {
-      console.log('error', error);
-      throw new Error('구글 로그인을 실패하였습니다.' + error);
-    }
+        image_url,
+        username,
+      },
+      result: 'success',
+      message: '로그인을 성공하였습니다.',
+    });
   }
 
   async signinKakao(
@@ -314,96 +306,88 @@ export class AuthService {
     // 카카오 - 클라이언트로부터 받은 code
     const { code } = kakaoDto;
 
-    try {
-      // access_token 받기 위한 요청
-      const kakaoResponse = await fetch('https://kauth.kakao.com/oauth/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
-        },
-        body: new URLSearchParams({
-          code,
-          client_id: isDevelopment
-            ? process.env.LOCAL_KAKAO_CLIENT_ID
-            : process.env.KAKAO_CLIENT_ID,
-          client_secret: isDevelopment
-            ? process.env.LOCAL_KAKAO_CLIENT_SECRET
-            : process.env.KAKAO_CLIENT_SECRET,
-          grant_type: 'authorization_code',
-          redirect_uri: isDevelopment
-            ? process.env.LOCAL_KAKAO_REDIRECT_URL
-            : process.env.KAKAO_REDIRECT_URL,
-        }),
-      });
+    // access_token 받기 위한 요청
+    const kakaoResponse = await fetch('https://kauth.kakao.com/oauth/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+      },
+      body: new URLSearchParams({
+        code,
+        client_id: isDevelopment
+          ? process.env.LOCAL_KAKAO_CLIENT_ID
+          : process.env.KAKAO_CLIENT_ID,
+        client_secret: isDevelopment
+          ? process.env.LOCAL_KAKAO_CLIENT_SECRET
+          : process.env.KAKAO_CLIENT_SECRET,
+        grant_type: 'authorization_code',
+        redirect_uri: isDevelopment
+          ? process.env.LOCAL_KAKAO_REDIRECT_URL
+          : process.env.KAKAO_REDIRECT_URL,
+      }),
+    });
 
-      const jsonResponse = await kakaoResponse.json();
+    const jsonResponse = await kakaoResponse.json();
 
-      const access_token = jsonResponse.access_token;
+    const access_token = jsonResponse.access_token;
 
-      // 카카오로부터 사용자 정보 받기 위한 요청
-      const userinfoResponse = await fetch(
-        `https://kapi.kakao.com/v2/user/me`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: ` Bearer ${access_token}`,
-            'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
-          },
-        },
-      );
+    // 카카오로부터 사용자 정보 받기 위한 요청
+    const userinfoResponse = await fetch(`https://kapi.kakao.com/v2/user/me`, {
+      method: 'GET',
+      headers: {
+        Authorization: ` Bearer ${access_token}`,
+        'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+      },
+    });
 
-      const {
-        id: provider_id,
-        properties: { nickname, profile_image },
-      } = await userinfoResponse.json();
+    const {
+      id: provider_id,
+      properties: { nickname, profile_image },
+    } = await userinfoResponse.json();
 
-      const findUser = await this.userRepository.findOne({
-        where: { provider_id },
-      });
+    const findUser = await this.userRepository.findOne({
+      where: { provider_id },
+    });
 
-      // 회원 존재 (기가입 회원일 경우)
-      if (findUser) {
-        const JWT_SECRET = process.env.JWT_SECRET || '';
+    // 회원 존재 (기가입 회원일 경우)
+    if (findUser) {
+      const JWT_SECRET = process.env.JWT_SECRET || '';
 
-        const alg = 'HS256';
+      const alg = 'HS256';
 
-        // JWT token
-        const token = await new jose.SignJWT({
+      // JWT token
+      const token = await new jose.SignJWT({
+        id: findUser.id,
+        email: findUser.email,
+      })
+        .setProtectedHeader({ alg })
+        .setIssuedAt()
+        .setExpirationTime('2h')
+        .sign(new TextEncoder().encode(JWT_SECRET));
+
+      // 바로 토큰 전송
+      response.json({
+        data: {
+          token, // token 값을 전달 (25.03.21 iOS Safari 이슈로 쿠키 방식에서 수정)
           id: findUser.id,
           email: findUser.email,
-        })
-          .setProtectedHeader({ alg })
-          .setIssuedAt()
-          .setExpirationTime('2h')
-          .sign(new TextEncoder().encode(JWT_SECRET));
-
-        // 바로 토큰 전송
-        response.json({
-          data: {
-            token, // token 값을 전달 (25.03.21 iOS Safari 이슈로 쿠키 방식에서 수정)
-            id: findUser.id,
-            email: findUser.email,
-            image_url: findUser.image_url,
-            username: findUser.username,
-          },
-          result: 'success',
-          message: '카카오 로그인을 성공하였습니다.',
-        });
-      } else {
-        // 클라이언트에 회원가입에 필요한 카카오 id 및 회원정보 전달
-        response.json({
-          data: {
-            provider_id,
-            image_url: profile_image,
-            username: nickname,
-          },
-          result: 'success',
-          message: '회원가입 완료를 위해 이메일 입력을 진행합니다.',
-        });
-      }
-    } catch (error) {
-      console.log('error', error);
-      throw new Error('카카오 로그인을 실패하였습니다.' + error);
+          image_url: findUser.image_url,
+          username: findUser.username,
+        },
+        result: 'success',
+        message: '카카오 로그인을 성공하였습니다.',
+      });
+    } else {
+      // 클라이언트에 회원가입에 필요한 카카오 id 및 회원정보 전달
+      response.json({
+        data: {
+          provider_id,
+          image_url: profile_image,
+          username: nickname,
+        },
+        result: 'success',
+        message: '회원가입 완료를 위해 이메일 입력을 진행합니다.',
+      });
     }
   }
 
@@ -472,114 +456,115 @@ export class AuthService {
     // 네이버 - 클라이언트로부터 받은 code 및 state 문자열
     const { code, state } = naverDto;
 
-    try {
-      // access_token 받기 위한 요청
-      const naverResponse = await fetch(
-        'https://nid.naver.com/oauth2.0/token',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: new URLSearchParams({
-            code,
-            client_id: isDevelopment
-              ? process.env.LOCAL_NAVER_CLIENT_ID
-              : process.env.NAVER_CLIENT_ID,
-            client_secret: isDevelopment
-              ? process.env.LOCAL_NAVER_CLIENT_SECRET
-              : process.env.NAVER_CLIENT_SECRET,
-            grant_type: 'authorization_code',
-            state,
-          }),
+    // access_token 받기 위한 요청
+    const naverResponse = await fetch('https://nid.naver.com/oauth2.0/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        code,
+        client_id: isDevelopment
+          ? process.env.LOCAL_NAVER_CLIENT_ID
+          : process.env.NAVER_CLIENT_ID,
+        client_secret: isDevelopment
+          ? process.env.LOCAL_NAVER_CLIENT_SECRET
+          : process.env.NAVER_CLIENT_SECRET,
+        grant_type: 'authorization_code',
+        state,
+      }),
+    });
+
+    const jsonResponse = await naverResponse.json();
+
+    const access_token = jsonResponse.access_token;
+
+    // 네이버로부터 사용자 정보 받기 위한 요청
+    const userinfoResponse = await fetch(
+      `https://openapi.naver.com/v1/nid/me`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: ` Bearer ${access_token}`,
         },
-      );
+      },
+    );
 
-      const jsonResponse = await naverResponse.json();
+    const {
+      // message,
+      response: userinfo,
+    } = await userinfoResponse.json();
 
-      const access_token = jsonResponse.access_token;
+    const {
+      id: provider_id,
+      email,
+      nickname,
+      name,
+      profile_image: image_url,
+    } = userinfo;
 
-      // 네이버로부터 사용자 정보 받기 위한 요청
-      const userinfoResponse = await fetch(
-        `https://openapi.naver.com/v1/nid/me`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: ` Bearer ${access_token}`,
-          },
-        },
-      );
+    /** 이메일 중복 여부 */
+    const isDuplicateEmail = await this.userRepository.findOne({
+      where: { email },
+    });
 
-      const {
-        // message,
-        response: userinfo,
-      } = await userinfoResponse.json();
+    if (isDuplicateEmail) {
+      throw new ConflictException('이미 가입된 이메일입니다.');
+    }
 
-      const {
-        id: provider_id,
-        email,
-        nickname,
-        name,
-        profile_image: image_url,
-      } = userinfo;
+    const username = name || nickname;
 
-      const username = name || nickname;
+    let id;
 
-      let id;
+    const findUser = await this.userRepository.findOne({
+      where: { provider_id },
+    });
 
-      const findUser = await this.userRepository.findOne({
-        where: { provider_id },
-      });
+    if (!findUser) {
+      // TODO: 추후 메일 중복 확인 로직 필요
 
-      if (!findUser) {
-        // TODO: 추후 메일 중복 확인 로직 필요
+      const result = await this.userRepository
+        .createQueryBuilder('user')
+        .insert()
+        .into(User)
+        .values({
+          email,
+          username,
+          image_url,
+          provider: 'naver',
+          provider_id,
+        })
+        .execute();
 
-        const result = await this.userRepository
-          .createQueryBuilder('user')
-          .insert()
-          .into(User)
-          .values({
-            email,
-            username,
-            image_url,
-            provider: 'naver',
-            provider_id,
-          })
-          .execute();
+      id = result.raw.insertId;
+    } else {
+      id = findUser.id;
+    }
 
-        id = result.raw.insertId;
-      } else {
-        id = findUser.id;
-      }
+    const JWT_SECRET = process.env.JWT_SECRET || '';
 
-      const JWT_SECRET = process.env.JWT_SECRET || '';
+    const alg = 'HS256';
 
-      const alg = 'HS256';
+    // JWT token
+    const token = await new jose.SignJWT({
+      id,
+      email,
+    })
+      .setProtectedHeader({ alg })
+      .setIssuedAt()
+      .setExpirationTime('2h')
+      .sign(new TextEncoder().encode(JWT_SECRET));
 
-      // JWT token
-      const token = await new jose.SignJWT({
+    response.json({
+      data: {
+        token, // token 값을 전달 (25.03.21 iOS Safari 이슈로 쿠키 방식에서 수정)
         id,
         email,
-      })
-        .setProtectedHeader({ alg })
-        .setIssuedAt()
-        .setExpirationTime('2h')
-        .sign(new TextEncoder().encode(JWT_SECRET));
-
-      response.json({
-        data: {
-          token, // token 값을 전달 (25.03.21 iOS Safari 이슈로 쿠키 방식에서 수정)
-          id,
-          email,
-          image_url,
-          username,
-        },
-        result: 'success',
-        message: '로그인을 성공하였습니다.',
-      });
-    } catch (error) {
-      console.log('error', error);
-      throw new Error('구글 로그인을 실패하였습니다.' + error);
-    }
+        image_url,
+        username,
+      },
+      result: 'success',
+      message: '로그인을 성공하였습니다.',
+    });
   }
 }
