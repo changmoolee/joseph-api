@@ -20,7 +20,7 @@ import { GptModule } from 'src/gpt/gpt.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronModule } from 'src/cron/cron.module';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { MailModule } from 'src/mail/mail.module';
+import { AuthCodeModule } from 'src/auth-code/auth-code.module';
 
 // 개발환경 여부
 const isDevelopment = process.env.NODE_ENV === 'development';
@@ -64,7 +64,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
     FollowModule,
     GptModule,
     CronModule,
-    MailModule,
+    AuthCodeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,7 +1,7 @@
 import { Body, Injectable, Req, UnauthorizedException } from '@nestjs/common';
 import { ApiResponseDto } from 'src/common/dto/response.dto';
 import { MailerService } from '@nestjs-modules/mailer';
-import { SendEmailDto } from 'src/mail/dto/send-email.dto';
+import { SendAuthCodeDto } from 'src/auth-code/dto/send-auth-code.dto';
 import * as crypto from 'crypto';
 
 /**
@@ -9,12 +9,12 @@ import * as crypto from 'crypto';
  */
 
 @Injectable()
-export class MailService {
+export class AuthCodeService {
   constructor(private readonly mailerService: MailerService) {}
 
   async sendAuthCode(
     @Req() req: Request,
-    @Body() emailDto: SendEmailDto,
+    @Body() emailDto: SendAuthCodeDto,
   ): Promise<ApiResponseDto<null>> {
     /** 애플리케이션 전용 키 체크 */
     const appSecret = req.headers['x-app-secret'];
