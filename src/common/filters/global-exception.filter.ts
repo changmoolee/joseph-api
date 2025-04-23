@@ -37,9 +37,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       `📌 [${request.method}] ${request.url} 요청 중 에러 발생`,
     );
 
-    this.logger.error(
-      `🚫 status : ${exception.getStatus()} 에러 내용 : ${exception}`,
-    );
+    this.logger.error(`🚫 에러 내용 : ${exception}`);
 
     response.status(status).json({
       data: null,
