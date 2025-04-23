@@ -21,6 +21,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { CronModule } from 'src/cron/cron.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { AuthCodeModule } from 'src/auth-code/auth-code.module';
+import { RedisModule } from '@nestjs-modules/ioredis';
 
 // 개발환경 여부
 const isDevelopment = process.env.NODE_ENV === 'development';
@@ -53,6 +54,11 @@ const isDevelopment = process.env.NODE_ENV === 'development';
           pass: process.env.MAIL_PASS,
         },
       },
+    }),
+    RedisModule.forRoot({
+      // https://www.npmjs.com/package/@nestjs-modules/ioredis
+      type: 'single',
+      url: 'redis://localhost:6379',
     }),
     // 모듈 추가 필수
     UserModule,
