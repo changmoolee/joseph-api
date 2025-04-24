@@ -503,15 +503,6 @@ export class AuthService {
       profile_image: image_url,
     } = userinfo;
 
-    /** 이메일 중복 여부 */
-    const isDuplicateEmail = await this.userRepository.findOne({
-      where: { email },
-    });
-
-    if (isDuplicateEmail) {
-      throw new ConflictException('이미 가입된 이메일입니다.');
-    }
-
     const username = name || nickname;
 
     let id;
@@ -521,7 +512,14 @@ export class AuthService {
     });
 
     if (!findUser) {
-      // TODO: 추후 메일 중복 확인 로직 필요
+      /** 이메일 중복 여부 확인 */
+      const isDuplicateEmail = await this.userRepository.findOne({
+        where: { email },
+      });
+
+      if (isDuplicateEmail) {
+        throw new ConflictException('이미 가입된 이메일입니다.');
+      }
 
       const result = await this.userRepository
         .createQueryBuilder('user')
