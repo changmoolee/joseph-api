@@ -6,6 +6,7 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Req,
   Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -19,6 +20,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { SigninGoogleDto } from 'src/auth/dto/signin-google.dto';
 import { SigninKakaoDto, KakaoUserDto } from 'src/auth/dto/signin-kakao.dto';
 import { SigninNaverDto } from 'src/auth/dto/signin-naver.dto';
+import { VerifyPasswordDto } from 'src/auth/dto/verify-password';
 
 @Controller('auth')
 export class AuthController {
@@ -42,6 +44,14 @@ export class AuthController {
   @Post('signout')
   async signoutUser(@Res() response: Response): Promise<void> {
     return this.authService.signoutUser(response);
+  }
+
+  @Post('verify-password')
+  async verifyPassword(
+    @Body() verfiyDto: VerifyPasswordDto,
+    @Req() req: Request,
+  ): Promise<ApiResponseDto<null>> {
+    return this.authService.verifyPassword(verfiyDto, req);
   }
 
   @ApiBearerAuth()
