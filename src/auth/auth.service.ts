@@ -38,12 +38,15 @@ export class AuthService {
     @Body() userDto: CreateUserDto,
   ): Promise<ApiResponseDto<[]>> {
     /** 이메일 중복 여부 */
-    const isDuplicateEmail = await this.userRepository.findOne({
+    const findDuplicateEmail = await this.userRepository.findOne({
       where: { email: userDto.email },
+      withDeleted: true, // ‼️ 소프트 딜리트된 항목도 포함
     });
 
-    if (isDuplicateEmail) {
-      throw new ConflictException('이미 가입된 이메일입니다.');
+    if (!!findDuplicateEmail) {
+      throw new ConflictException(
+        `email : ${userDto.email} - 이미 가입된 이메일입니다.\n기존 ${findDuplicateEmail.provider ? '플랫폼 : ' + findDuplicateEmail.provider : '이메일'}으로 로그인해주세요.`,
+      );
     }
 
     // cost 10
@@ -77,10 +80,21 @@ export class AuthService {
     // https://docs.nestjs.com/security/authentication
     const findUser = await this.userRepository.findOne({
       where: { email: userDto.email },
+      withDeleted: true, // ‼️ 소프트 딜리트된 항목도 포함
     });
 
     if (!findUser) {
       throw new NotFoundException('존재하지 않는 이메일입니다.');
+    }
+
+    /** 탈퇴 여부 */
+    const isDeleted = findUser && findUser.deleted_at !== null;
+
+    // 탈퇴한 회원일 경우
+    if (isDeleted) {
+      // soft deleted 된 계정을 복구한다.
+      findUser.deleted_at = null;
+      await this.userRepository.save(findUser);
     }
 
     /** 패스워드 일치 여부 */
@@ -107,13 +121,16 @@ export class AuthService {
     response.json({
       data: {
         token, // token 값을 전달 (25.03.21 iOS Safari 이슈로 쿠키 방식에서 수정)
+        isDeleted, // 탈퇴 후 재로그인 여부 전달 (25.04.24 새로 isDeleted 추가)
         id: findUser.id,
         email: findUser.email,
         image_url: findUser.image_url,
         username: findUser.username,
       },
       result: 'success',
-      message: '로그인을 성공하였습니다.',
+      message: isDeleted
+        ? '탈퇴된 계정을 복구하고 로그인에 성공하였습니다.'
+        : '로그인을 성공하였습니다.',
     });
   }
 
@@ -251,9 +268,32 @@ export class AuthService {
 
     const findUser = await this.userRepository.findOne({
       where: { provider_id },
+      withDeleted: true, // ‼️ 소프트 딜리트된 항목도 포함
     });
+    /** 탈퇴 여부 */
+    const isDeleted = findUser && findUser.deleted_at !== null;
 
+    // 탈퇴한 회원일 경우
+    if (isDeleted) {
+      // soft deleted 된 계정을 복구한다.
+      findUser.deleted_at = null;
+      await this.userRepository.save(findUser);
+    }
+
+    // 기존 provider_id가 없다면, 구글 소셜 신규회원
     if (!findUser) {
+      /** 이메일 중복 여부 확인 (다른 플랫폼으로 가입 여부) */
+      const findDuplicateEmail = await this.userRepository.findOne({
+        where: { email },
+        withDeleted: true, // ‼️ 소프트 딜리트된 항목도 포함
+      });
+
+      if (!!findDuplicateEmail) {
+        throw new ConflictException(
+          `email : ${email} - 이미 가입된 이메일입니다.\n기존 ${findDuplicateEmail.provider ? '플랫폼 : ' + findDuplicateEmail.provider : '이메일'}으로 로그인해주세요.`,
+        );
+      }
+
       const result = await this.userRepository
         .createQueryBuilder('user')
         .insert()
@@ -289,13 +329,16 @@ export class AuthService {
     response.json({
       data: {
         token, // token 값을 전달 (25.03.21 iOS Safari 이슈로 쿠키 방식에서 수정)
+        isDeleted, // 탈퇴 후 재로그인 여부 전달 (25.04.24 새로 isDeleted 추가)
         id,
         email,
         image_url,
         username,
       },
       result: 'success',
-      message: '로그인을 성공하였습니다.',
+      message: isDeleted
+        ? '탈퇴된 계정을 복구하고 구글 로그인에 성공하였습니다.'
+        : '구글 로그인을 성공하였습니다.',
     });
   }
 
@@ -347,10 +390,28 @@ export class AuthService {
 
     const findUser = await this.userRepository.findOne({
       where: { provider_id },
+      withDeleted: true, // ‼️ 소프트 딜리트된 항목도 포함
     });
+
+    /** 탈퇴 여부 */
+    const isDeleted = findUser && findUser.deleted_at !== null;
+
+    // 탈퇴한 회원일 경우
+    if (isDeleted) {
+      // soft deleted 된 계정을 복구한다.
+      findUser.deleted_at = null;
+      await this.userRepository.save(findUser);
+    }
 
     // 회원 존재 (기가입 회원일 경우)
     if (findUser) {
+      // 탈퇴한 회원일 경우
+      if (typeof findUser.deleted_at !== null) {
+        // soft deleted 된 계정을 복구한다.
+        findUser.deleted_at = null;
+        await this.userRepository.save(findUser);
+      }
+
       const JWT_SECRET = process.env.JWT_SECRET || '';
 
       const alg = 'HS256';
@@ -369,13 +430,16 @@ export class AuthService {
       response.json({
         data: {
           token, // token 값을 전달 (25.03.21 iOS Safari 이슈로 쿠키 방식에서 수정)
+          isDeleted, // 탈퇴 후 재로그인 여부 전달 (25.04.24 새로 isDeleted 추가)
           id: findUser.id,
           email: findUser.email,
           image_url: findUser.image_url,
           username: findUser.username,
         },
         result: 'success',
-        message: '카카오 로그인을 성공하였습니다.',
+        message: isDeleted
+          ? '탈퇴된 계정을 복구하고 카카오 로그인에 성공하였습니다.'
+          : '카카오 로그인을 성공하였습니다.',
       });
     } else {
       // 클라이언트에 회원가입에 필요한 카카오 id 및 회원정보 전달
@@ -398,12 +462,17 @@ export class AuthService {
     const { provider_id, email, image_url, username } = userDto;
 
     /** 이메일 중복 여부 */
-    const isDuplicateEmail = await this.userRepository.findOne({
-      where: { email: userDto.email },
+    const findDuplicateEmail = await this.userRepository.findOne({
+      where: {
+        email,
+      },
+      withDeleted: true, // ‼️ 소프트 딜리트된 항목도 포함
     });
 
-    if (isDuplicateEmail) {
-      throw new ConflictException('이미 가입된 이메일입니다.');
+    if (!!findDuplicateEmail) {
+      throw new ConflictException(
+        `email : ${email} - 이미 가입된 이메일입니다.\n기존 ${findDuplicateEmail.provider ? '플랫폼 : ' + findDuplicateEmail.provider : '이메일'}으로 로그인해주세요.`,
+      );
     }
 
     // https://typeorm.io/insert-query-builder
@@ -509,16 +578,31 @@ export class AuthService {
 
     const findUser = await this.userRepository.findOne({
       where: { provider_id },
+      withDeleted: true, // ‼️ 소프트 딜리트된 항목도 포함
     });
 
+    /** 탈퇴 여부 */
+    const isDeleted = findUser && findUser.deleted_at !== null;
+
+    // 탈퇴한 회원일 경우
+    if (isDeleted) {
+      // soft deleted 된 계정을 복구한다.
+      findUser.deleted_at = null;
+      await this.userRepository.save(findUser);
+    }
+
+    // 기존 provider_id가 없다면, 네이버 소셜 신규회원
     if (!findUser) {
-      /** 이메일 중복 여부 확인 */
-      const isDuplicateEmail = await this.userRepository.findOne({
+      /** 이메일 중복 여부 확인 (다른 플랫폼으로 가입 여부) */
+      const findDuplicateEmail = await this.userRepository.findOne({
         where: { email },
+        withDeleted: true, // ‼️ 소프트 딜리트된 항목도 포함
       });
 
-      if (isDuplicateEmail) {
-        throw new ConflictException('이미 가입된 이메일입니다.');
+      if (!!findDuplicateEmail) {
+        throw new ConflictException(
+          `email : ${email} - 이미 가입된 이메일입니다.\n기존 ${findDuplicateEmail.provider ? '플랫폼 : ' + findDuplicateEmail.provider : '이메일'}으로 로그인해주세요.`,
+        );
       }
 
       const result = await this.userRepository
@@ -556,13 +640,16 @@ export class AuthService {
     response.json({
       data: {
         token, // token 값을 전달 (25.03.21 iOS Safari 이슈로 쿠키 방식에서 수정)
+        isDeleted, // 탈퇴 후 재로그인 여부 전달 (25.04.24 새로 isDeleted 추가)
         id,
         email,
         image_url,
         username,
       },
       result: 'success',
-      message: '로그인을 성공하였습니다.',
+      message: isDeleted
+        ? '탈퇴된 계정을 복구하고 네이버 로그인에 성공하였습니다.'
+        : '네이버 로그인을 성공하였습니다.',
     });
   }
 }
