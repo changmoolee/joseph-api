@@ -126,6 +126,7 @@ export class AuthService {
         email: findUser.email,
         image_url: findUser.image_url,
         username: findUser.username,
+        provider: null,
       },
       result: 'success',
       message: isDeleted
@@ -334,6 +335,7 @@ export class AuthService {
         email,
         image_url,
         username,
+        provider: 'google',
       },
       result: 'success',
       message: isDeleted
@@ -435,6 +437,7 @@ export class AuthService {
           email: findUser.email,
           image_url: findUser.image_url,
           username: findUser.username,
+          provider: 'kakao',
         },
         result: 'success',
         message: isDeleted
@@ -512,6 +515,7 @@ export class AuthService {
         email,
         image_url,
         username,
+        provider: 'kakao',
       },
       result: 'success',
       message: '카카오 로그인을 성공하였습니다.',
@@ -645,6 +649,7 @@ export class AuthService {
         email,
         image_url,
         username,
+        provider: 'naver',
       },
       result: 'success',
       message: isDeleted
