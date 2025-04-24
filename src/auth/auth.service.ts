@@ -6,6 +6,7 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  Req,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -20,6 +21,7 @@ import { UpdateUserDto } from 'src/auth/dto/update-user.dto';
 import { SigninGoogleDto } from 'src/auth/dto/signin-google.dto';
 import { SigninKakaoDto, KakaoUserDto } from 'src/auth/dto/signin-kakao.dto';
 import { SigninNaverDto } from 'src/auth/dto/signin-naver.dto';
+import { VerifyPasswordDto } from 'src/auth/dto/verify-password';
 
 // 개발환경 여부
 const isDevelopment = process.env.NODE_ENV === 'development';
@@ -126,6 +128,7 @@ export class AuthService {
         email: findUser.email,
         image_url: findUser.image_url,
         username: findUser.username,
+        provider: null,
       },
       result: 'success',
       message: isDeleted
@@ -147,6 +150,34 @@ export class AuthService {
       result: 'success',
       message: '로그아웃하였습니다.',
     });
+  }
+
+  async verifyPassword(
+    @Body() verfiyDto: VerifyPasswordDto,
+    @Req() req: Request,
+  ): Promise<ApiResponseDto<null>> {
+    /** jwt 토큰 - 로그인한 회원의 id */
+    const user_id = req['user'].id;
+
+    const findUser = await this.userRepository.findOne({
+      where: {
+        id: user_id,
+      },
+    });
+
+    /** 패스워드 일치 여부 */
+    const isMatch = await bcrypt.compare(verfiyDto.password, findUser.password);
+
+    // 불일치시 에러
+    if (!isMatch) {
+      throw new BadRequestException('비밀번호가 일치하지 않습니다.');
+    }
+
+    return {
+      data: null,
+      result: 'success',
+      message: '비밀번호 재입력 인증을 성공하였습니다.',
+    };
   }
 
   async updateUser(
@@ -334,6 +365,7 @@ export class AuthService {
         email,
         image_url,
         username,
+        provider: 'google',
       },
       result: 'success',
       message: isDeleted
@@ -435,6 +467,7 @@ export class AuthService {
           email: findUser.email,
           image_url: findUser.image_url,
           username: findUser.username,
+          provider: 'kakao',
         },
         result: 'success',
         message: isDeleted
@@ -512,6 +545,7 @@ export class AuthService {
         email,
         image_url,
         username,
+        provider: 'kakao',
       },
       result: 'success',
       message: '카카오 로그인을 성공하였습니다.',
@@ -645,6 +679,7 @@ export class AuthService {
         email,
         image_url,
         username,
+        provider: 'naver',
       },
       result: 'success',
       message: isDeleted
