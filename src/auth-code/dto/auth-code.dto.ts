@@ -5,3 +5,13 @@ export class SendAuthCodeDto {
   @IsString()
   email: string;
 }
+
+export class VerifyAuthCodeDto {
+  @IsNotEmpty()
+  @IsString()
+  email: string;
+
+  @IsNotEmpty()
+  @IsString()
+  code: string;
+}
