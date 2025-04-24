@@ -2,12 +2,11 @@
 
 <br>
 
-🚀 **배포 URL:**
 
-**백엔드 (NestJS) →** [🌐 joseph-backend.site](https://joseph-backend.site)
+**🚀 백엔드 (NestJS) Swagger Api 문서 →** [☘️ swagger](https://joseph-backend.site/api) 
 
 - GitHub 레포지토리: [📂 joseph-api](https://github.com/changmoolee/joseph-api)
-- Swagger Api 문서: [☘️ swagger](https://joseph-backend.site/api)
+- 배포 URL: [🌐 joseph-backend.site](https://joseph-backend.site)
 
 **프론트엔드 (Next.js) →** [🌍 joseph-instagram.vercel.app](https://joseph-instagram.vercel.app/)
 
@@ -53,6 +52,9 @@
 <img src="https://img.shields.io/badge/JWT-black?style=flat-square&logo=jsonwebtokens&logoColor=white"/></a>
 <img src="https://img.shields.io/badge/bcrypt-aaaaaa?style=flat-square&logo=security&logoColor=white"/></a>
 <img src="https://img.shields.io/badge/Google OAuth2.0-4285F4?style=flat-square&logo=google&logoColor=white"/></a>
+<img src="https://img.shields.io/badge/Kakao OAuth2.0-FEE500?style=flat-square&logo=kakao&logoColor=black"/>
+<img src="https://img.shields.io/badge/Naver OAuth2.0-03C75A?style=flat-square&logo=naver&logoColor=white"/>
+<img src="https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=redis&logoColor=white"/>
 
 ### 📌 **AI / 외부 API 연동**
 
@@ -68,8 +70,13 @@
 ### 주요 기능
 
 1. **사용자 인증** <br>
-   - 회원가입, 로그인 (JWT 기반 인증)<br>
-   - ✅ Google OAuth 로그인 연동 (code → access_token → 사용자 정보 → JWT 발급)
+   - 회원가입, 로그인 (JWT 기반 인증)
+   - ✅ Google / Kakao / Naver 소셜 로그인 연동
+     - OAuth2.0 flow 처리 (code → access_token → 사용자 정보 → JWT 발급)
+   - Kakao 소셜 로그인 - 이메일 인증 시스템
+     - Kakao 로그인 시 이메일 정보 미제공(비즈 미인증) → 프론트에서 사용자 이메일 수집
+     - 인증코드 이메일 발송 API (nodemailer 사용)
+     - 이메일 입력 후 인증 코드 발송 → Redis에 저장된 코드 검증 → 가입 완료
    - 비밀번호 암호화 (bcrypt)<br>
    - 사용자 정보 조회 및 수정<br><br>
 2. **게시글 관리** <br>
@@ -95,7 +102,8 @@
 ## 📂 프로젝트 구조
 
 📦 src<br>
-┣ 📂 auth - 인증 관련 (JWT, 회원가입, 로그인, Google OAuth 처리)<br>
+┣ 📂 auth - 인증 관련 (JWT, 회원가입, 로그인, 소셜 로그인)<br>
+┣ 📂 auth-code - 이메일 인증<br>
 ┣ 📂 common - 공통 유틸 및 DTO<br>
 ┣ 📂 like - 좋아요 기능<br>
 ┣ 📂 bookmark - 북마크 기능<br>
