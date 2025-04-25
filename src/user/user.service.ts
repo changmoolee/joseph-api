@@ -14,16 +14,6 @@ export class UserService {
     private userRepository: Repository<User>,
   ) {}
 
-  async getAllUsers(): Promise<ApiResponseDto<User[]>> {
-    const users = await this.userRepository.find();
-
-    return {
-      data: users,
-      result: 'success',
-      message: '유저 데이터 호출 완료',
-    };
-  }
-
   async getUser(@Param('id') id: number): Promise<ApiResponseDto<User>> {
     const findUser = await this.userRepository
       .createQueryBuilder('user')
