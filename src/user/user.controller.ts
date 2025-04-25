@@ -7,11 +7,6 @@ import { ApiResponseDto } from 'src/common/dto/response.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get()
-  async getAllUsers(): Promise<ApiResponseDto<User[]>> {
-    return this.userService.getAllUsers();
-  }
-
   @Get('search')
   async searchUsers(
     @Query('text') text: string,
